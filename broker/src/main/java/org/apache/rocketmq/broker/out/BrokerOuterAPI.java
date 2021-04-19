@@ -124,19 +124,24 @@ public class BrokerOuterAPI {
         final boolean compressed) {
 
         final List<RegisterBrokerResult> registerBrokerResultList = Lists.newArrayList();
+        // 获得nameServer地址信息
         List<String> nameServerAddressList = this.remotingClient.getNameServerAddressList();
         if (nameServerAddressList != null && nameServerAddressList.size() > 0) {
 
+            // 封装请求头
             final RegisterBrokerRequestHeader requestHeader = new RegisterBrokerRequestHeader();
             requestHeader.setBrokerAddr(brokerAddr);
             requestHeader.setBrokerId(brokerId);
             requestHeader.setBrokerName(brokerName);
             requestHeader.setClusterName(clusterName);
+            // master地址
             requestHeader.setHaServerAddr(haServerAddr);
             requestHeader.setCompressed(compressed);
 
+            // 封装请求体
             RegisterBrokerBody requestBody = new RegisterBrokerBody();
             requestBody.setTopicConfigSerializeWrapper(topicConfigWrapper);
+            // 消息过滤服务器列表
             requestBody.setFilterServerList(filterServerList);
             final byte[] body = requestBody.encode(compressed);
             final int bodyCrc32 = UtilAll.crc32(body);
@@ -147,6 +152,7 @@ public class BrokerOuterAPI {
                     @Override
                     public void run() {
                         try {
+                            // 分别向nameServer注册
                             RegisterBrokerResult result = registerBroker(namesrvAddr,oneway, timeoutMills,requestHeader,body);
                             if (result != null) {
                                 registerBrokerResultList.add(result);

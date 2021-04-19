@@ -887,6 +887,8 @@ public class BrokerController {
             this.registerBrokerAll(true, false, true);
         }
 
+        // 每隔30s上报broker信息到NameServer
+        // 只能在[10s,60s]这个区间内
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override
@@ -948,12 +950,14 @@ public class BrokerController {
             this.brokerConfig.getBrokerName(),
             this.brokerConfig.getBrokerId(),
             this.brokerConfig.getRegisterBrokerTimeoutMills())) {
+            // 开始注册
             doRegisterBrokerAll(checkOrderConfig, oneway, topicConfigWrapper);
         }
     }
 
     private void doRegisterBrokerAll(boolean checkOrderConfig, boolean oneway,
         TopicConfigSerializeWrapper topicConfigWrapper) {
+        // 开始注册
         List<RegisterBrokerResult> registerBrokerResultList = this.brokerOuterAPI.registerBrokerAll(
             this.brokerConfig.getBrokerClusterName(),
             this.getBrokerAddr(),

@@ -106,6 +106,10 @@ public class HAService {
     // this.groupTransferService.notifyTransferSome();
     // }
 
+    /**
+     * 主服务器启动，并在特定端口上监听从服务器的连接
+     *
+     */
     public void start() throws Exception {
         this.acceptSocketService.beginAccept();
         this.acceptSocketService.start();

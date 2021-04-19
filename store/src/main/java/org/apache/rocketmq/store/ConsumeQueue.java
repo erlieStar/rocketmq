@@ -488,8 +488,12 @@ public class ConsumeQueue {
         }
     }
 
+    /**
+     * 根据消息偏移量，时间戳查找消息
+     */
     public SelectMappedBufferResult getIndexBuffer(final long startIndex) {
         int mappedFileSize = this.mappedFileSize;
+        // 得到在consumerQueue中的物理偏移量
         long offset = startIndex * CQ_STORE_UNIT_SIZE;
         if (offset >= this.getMinLogicOffset()) {
             MappedFile mappedFile = this.mappedFileQueue.findMappedFileByOffset(offset);
@@ -498,6 +502,7 @@ public class ConsumeQueue {
                 return result;
             }
         }
+        // 文件被删除
         return null;
     }
 

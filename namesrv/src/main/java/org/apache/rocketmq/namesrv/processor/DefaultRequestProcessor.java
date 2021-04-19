@@ -67,6 +67,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
         this.namesrvController = namesrvController;
     }
 
+    // 解析请求类型
     @Override
     public RemotingCommand processRequest(ChannelHandlerContext ctx,
         RemotingCommand request) throws RemotingCommandException {
@@ -89,6 +90,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
             case RequestCode.QUERY_DATA_VERSION:
                 return queryBrokerTopicConfig(ctx, request);
             case RequestCode.REGISTER_BROKER:
+                // 注册broker信息
                 Version brokerVersion = MQVersion.value2Version(request.getVersion());
                 if (brokerVersion.ordinal() >= MQVersion.Version.V3_0_11.ordinal()) {
                     return this.registerBrokerWithFilterServer(ctx, request);
@@ -98,6 +100,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
             case RequestCode.UNREGISTER_BROKER:
                 return this.unregisterBroker(ctx, request);
             case RequestCode.GET_ROUTEINFO_BY_TOPIC:
+                // 获取路由信息
                 return this.getRouteInfoByTopic(ctx, request);
             case RequestCode.GET_BROKER_CLUSTER_INFO:
                 return this.getBrokerClusterInfo(ctx, request);
@@ -297,6 +300,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
             topicConfigWrapper.getDataVersion().setTimestamp(0);
         }
 
+        // 开始注册broker
         RegisterBrokerResult result = this.namesrvController.getRouteInfoManager().registerBroker(
             requestHeader.getClusterName(),
             requestHeader.getBrokerAddr(),
@@ -341,9 +345,14 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
         final GetRouteInfoRequestHeader requestHeader =
             (GetRouteInfoRequestHeader) request.decodeCommandCustomHeader(GetRouteInfoRequestHeader.class);
 
+        // 填充TopicRouteData的属性
+        // List<QueueData>
+        // List<BrokerData>
+        // HashMap<String/* brokerAddr */, List<String>/* Filter Server */>
         TopicRouteData topicRouteData = this.namesrvController.getRouteInfoManager().pickupTopicRouteData(requestHeader.getTopic());
 
         if (topicRouteData != null) {
+            // 该topic为顺序消息，从NameServer kvConfig中获取关于顺序消息相关的配置填充路由信息
             if (this.namesrvController.getNamesrvConfig().isOrderMessageEnable()) {
                 String orderTopicConf =
                     this.namesrvController.getKvConfigManager().getKVConfig(NamesrvUtil.NAMESPACE_ORDER_TOPIC_CONFIG,
@@ -358,6 +367,7 @@ public class DefaultRequestProcessor extends AsyncNettyRequestProcessor implemen
             return response;
         }
 
+        // 没有找到对应的路由信息
         response.setCode(ResponseCode.TOPIC_NOT_EXIST);
         response.setRemark("No topic route info in name server for the topic: " + requestHeader.getTopic()
             + FAQUrl.suggestTodo(FAQUrl.APPLY_TOPIC_URL));

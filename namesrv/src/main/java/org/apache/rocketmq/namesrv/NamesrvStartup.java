@@ -54,6 +54,7 @@ public class NamesrvStartup {
     public static NamesrvController main0(String[] args) {
 
         try {
+            // 解析配置文件，填充NamesrvConfig，NettyServerConfig 并创建NamesrvController
             NamesrvController controller = createNamesrvController(args);
             start(controller);
             String tip = "The Name Server boot success. serializeType=" + RemotingCommand.getSerializeTypeConfigInThisServer();
@@ -82,6 +83,11 @@ public class NamesrvStartup {
         final NamesrvConfig namesrvConfig = new NamesrvConfig();
         final NettyServerConfig nettyServerConfig = new NettyServerConfig();
         nettyServerConfig.setListenPort(9876);
+        // 解析-c参数，指定配置文件
+        // 参数来源有如下两种方式
+        // 1. -c configFile 指定配置文件的路径
+        // 2. -- 属性名 属性值 例如 -- listenPort 9876
+        // 将配置文件中的属性转成NamesrvConfig，NettyServerConfig
         if (commandLine.hasOption('c')) {
             String file = commandLine.getOptionValue('c');
             if (file != null) {
@@ -143,6 +149,7 @@ public class NamesrvStartup {
             System.exit(-3);
         }
 
+        // 释放资源
         Runtime.getRuntime().addShutdownHook(new ShutdownHookThread(log, new Callable<Void>() {
             @Override
             public Void call() throws Exception {

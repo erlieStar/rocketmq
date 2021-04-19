@@ -66,20 +66,22 @@ import org.apache.rocketmq.store.stats.BrokerStatsManager;
 public class DefaultMessageStore implements MessageStore {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    // 消息存储配置
     private final MessageStoreConfig messageStoreConfig;
     // CommitLog
     private final CommitLog commitLog;
 
     private final ConcurrentMap<String/* topic */, ConcurrentMap<Integer/* queueId */, ConsumeQueue>> consumeQueueTable;
 
+    // 消息队列文件ConsumeQueue刷盘线程
     private final FlushConsumeQueueService flushConsumeQueueService;
-
+    // 清除commitlog
     private final CleanCommitLogService cleanCommitLogService;
-
+    // 清除consumerQueue
     private final CleanConsumeQueueService cleanConsumeQueueService;
-
+    // 索引文件实现类
     private final IndexService indexService;
-
+    // MappedFile分配服务
     private final AllocateMappedFileService allocateMappedFileService;
 
     private final ReputMessageService reputMessageService;
@@ -102,11 +104,11 @@ public class DefaultMessageStore implements MessageStore {
     private final BrokerConfig brokerConfig;
 
     private volatile boolean shutdown = true;
-
+    // 文件刷盘检测点
     private StoreCheckpoint storeCheckpoint;
 
     private AtomicLong printTimes = new AtomicLong(0);
-
+    // CommitLog文件转发请求
     private final LinkedList<CommitLogDispatcher> dispatcherList;
 
     private RandomAccessFile lockFile;
@@ -473,6 +475,9 @@ public class DefaultMessageStore implements MessageStore {
         return resultFuture;
     }
 
+    /**
+     * 开始消息存储
+     */
     @Override
     public PutMessageResult putMessage(MessageExtBrokerInner msg) {
         PutMessageStatus checkStoreStatus = this.checkStoreStatus();
@@ -1292,6 +1297,8 @@ public class DefaultMessageStore implements MessageStore {
 
     private void addScheduleTask() {
 
+        // 定时删除过期文件
+        // 每隔10s调度一次
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
             @Override
             public void run() {
@@ -1611,7 +1618,9 @@ public class DefaultMessageStore implements MessageStore {
 
         private void deleteExpiredFiles() {
             int deleteCount = 0;
+            // 文件保留时间，从最后一次更新时间到现在，如果超过了该时间，则任务是过期文件，可以删除
             long fileReservedTime = DefaultMessageStore.this.getMessageStoreConfig().getFileReservedTime();
+            // 删除物理文件的间隔
             int deletePhysicFilesInterval = DefaultMessageStore.this.getMessageStoreConfig().getDeleteCommitLogFilesInterval();
             int destroyMapedFileIntervalForcibly = DefaultMessageStore.this.getMessageStoreConfig().getDestroyMapedFileIntervalForcibly();
 
@@ -1619,6 +1628,7 @@ public class DefaultMessageStore implements MessageStore {
             boolean spacefull = this.isSpaceToDelete();
             boolean manualDelete = this.manualDeleteFileSeveralTimes > 0;
 
+            // 执行删除任务
             if (timeup || spacefull || manualDelete) {
 
                 if (manualDelete)
@@ -1985,6 +1995,9 @@ public class DefaultMessageStore implements MessageStore {
             }
         }
 
+        /**
+         * 每隔1毫秒，转发消息到IndexFile和ConsumeQueue
+         */
         @Override
         public void run() {
             DefaultMessageStore.log.info(this.getServiceName() + " service started");

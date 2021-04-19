@@ -200,8 +200,10 @@ public class MappedFile extends ReferenceResource {
         assert messageExt != null;
         assert cb != null;
 
+        //获取文件写指针
         int currentPos = this.wrotePosition.get();
 
+        // 文件未写满
         if (currentPos < this.fileSize) {
             ByteBuffer byteBuffer = writeBuffer != null ? writeBuffer.slice() : this.mappedByteBuffer.slice();
             byteBuffer.position(currentPos);

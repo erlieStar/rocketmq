@@ -166,6 +166,7 @@ public class RouteInfoManager {
                     log.info("new broker registered, {} HAServer: {}", brokerAddr, haServerAddr);
                 }
 
+                // 注册filterServerList
                 if (filterServerList != null) {
                     if (filterServerList.isEmpty()) {
                         this.filterServerTable.remove(brokerAddr);

@@ -213,6 +213,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
                 this.submitConsumeRequestLater(consumeRequest);
             }
         } else {
+
             for (int total = 0; total < msgs.size(); ) {
                 List<MessageExt> msgThis = new ArrayList<MessageExt>(consumeBatchSize);
                 for (int i = 0; i < consumeBatchSize; i++, total++) {

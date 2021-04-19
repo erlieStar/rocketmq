@@ -180,6 +180,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             case CREATE_JUST:
                 this.serviceState = ServiceState.START_FAILED;
 
+                // 检查producerGroup
                 this.checkConfig();
 
                 if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
@@ -736,6 +737,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
 
             byte[] prevBody = msg.getBody();
             try {
+                // 设置消息id
                 //for MessageBatch,ID has been set in the generating process
                 if (!(msg instanceof MessageBatch)) {
                     MessageClientIDSetter.setUniqID(msg);

@@ -570,6 +570,9 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
         }
     }
 
+    /**
+     * 消息消费者启动
+     */
     public synchronized void start() throws MQClientException {
         switch (this.serviceState) {
             case CREATE_JUST:
@@ -577,6 +580,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                     this.defaultMQPushConsumer.getMessageModel(), this.defaultMQPushConsumer.isUnitMode());
                 this.serviceState = ServiceState.START_FAILED;
 
+                // 检查配置
                 this.checkConfig();
 
                 this.copySubscription();
@@ -626,6 +630,8 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
 
                 this.consumeMessageService.start();
 
+                // 向MQClientlnstance注册消费者，并启动MQClientInstance，在一个JVM中所有消费者，生成者持有统一个MQClientlnstance
+                // MQClientlnstance只会启动一次
                 boolean registerOK = mQClientFactory.registerConsumer(this.defaultMQPushConsumer.getConsumerGroup(), this);
                 if (!registerOK) {
                     this.serviceState = ServiceState.CREATE_JUST;
@@ -847,6 +853,9 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 case BROADCASTING:
                     break;
                 case CLUSTERING:
+                    // 订阅重试主题消息
+                    // RocketMQ重试是以消费组为单位，而不是topic
+                    // %RETRY% + 消费组名
                     final String retryTopic = MixAll.getRetryTopic(this.defaultMQPushConsumer.getConsumerGroup());
                     SubscriptionData subscriptionData = FilterAPI.buildSubscriptionData(this.defaultMQPushConsumer.getConsumerGroup(),
                         retryTopic, SubscriptionData.SUB_ALL);

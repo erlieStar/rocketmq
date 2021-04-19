@@ -37,6 +37,7 @@ public class IndexFile {
     private final MappedFile mappedFile;
     private final FileChannel fileChannel;
     private final MappedByteBuffer mappedByteBuffer;
+    // IndexFile的头部信息，包含40个字节，记录该IndexFile的统计信息
     private final IndexHeader indexHeader;
 
     public IndexFile(final String fileName, final int hashSlotNum, final int indexNum,
@@ -89,7 +90,15 @@ public class IndexFile {
         return this.mappedFile.destroy(intervalForcibly);
     }
 
+    /**
+     * IndexFile写入过程
+     * @param key 消息索引
+     * @param phyOffset 消息物理偏移量
+     * @param storeTimestamp 消息存储时间
+     * @return
+     */
     public boolean putKey(final String key, final long phyOffset, final long storeTimestamp) {
+        // 当前已使用的条目大于等于允许最大条目，返回false，当前索引文件已写满
         if (this.indexHeader.getIndexCount() < this.indexNum) {
             int keyHash = indexKeyHashMethod(key);
             int slotPos = keyHash % this.hashSlotNum;
