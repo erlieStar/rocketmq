@@ -152,6 +152,9 @@ public class ConsumeQueue {
         }
     }
 
+    /**
+     * 根据时间戳查找消息
+     */
     public long getOffsetInQueueByTime(final long timestamp) {
         MappedFile mappedFile = this.mappedFileQueue.getMappedFileByTime(timestamp);
         if (mappedFile != null) {
@@ -376,6 +379,9 @@ public class ConsumeQueue {
         return this.minLogicOffset / CQ_STORE_UNIT_SIZE;
     }
 
+    /**
+     * 消息分发
+     */
     public void putMessagePositionInfoWrapper(DispatchRequest request) {
         final int maxRetries = 30;
         boolean canWrite = this.defaultMessageStore.getRunningFlags().isCQWriteable();
@@ -395,6 +401,7 @@ public class ConsumeQueue {
                         topic, queueId, request.getCommitLogOffset());
                 }
             }
+            // 真正写入的过程
             boolean result = this.putMessagePositionInfo(request.getCommitLogOffset(),
                 request.getMsgSize(), tagsCode, request.getConsumeQueueOffset());
             if (result) {
@@ -471,6 +478,8 @@ public class ConsumeQueue {
                 }
             }
             this.maxPhysicOffset = offset + size;
+            // 将消息追加到内存映射文件，异步刷盘
+            // consumeQueue的刷盘方式固定为异步刷盘
             return mappedFile.appendMessage(this.byteBufferIndex.array());
         }
         return false;
@@ -490,12 +499,16 @@ public class ConsumeQueue {
 
     /**
      * 根据消息偏移量，时间戳查找消息
+     * @param startIndex 消息消费队列条目
+     * @return
      */
     public SelectMappedBufferResult getIndexBuffer(final long startIndex) {
         int mappedFileSize = this.mappedFileSize;
         // 得到在consumerQueue中的物理偏移量
+        // CQ_STORE_UNIT_SIZE = 8(commitlog offset) + 4(size) + 8(tag hashcode)
         long offset = startIndex * CQ_STORE_UNIT_SIZE;
         if (offset >= this.getMinLogicOffset()) {
+            // 根据时间戳定位到物理文件
             MappedFile mappedFile = this.mappedFileQueue.findMappedFileByOffset(offset);
             if (mappedFile != null) {
                 SelectMappedBufferResult result = mappedFile.selectMappedBuffer((int) (offset % mappedFileSize));

@@ -164,6 +164,7 @@ public class CommitLog {
 
     /**
      * When the normal exit, data recovery, all memory data have been flush
+     * broker正常停止，文件恢复
      */
     public void recoverNormally(long maxPhyOffsetOfConsumeQueue) {
         boolean checkCRCOnRecover = this.defaultMessageStore.getMessageStoreConfig().isCheckCRCOnRecover();

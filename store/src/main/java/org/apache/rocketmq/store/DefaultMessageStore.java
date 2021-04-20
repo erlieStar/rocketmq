@@ -184,9 +184,11 @@ public class DefaultMessageStore implements MessageStore {
         boolean result = true;
 
         try {
+            // 判断abort文件是否存在，存在则上次是异常退出的
             boolean lastExitOK = !this.isTempFileExist();
             log.info("last shutdown {}", lastExitOK ? "normally" : "abnormally");
 
+            // 加载延时队列，rocketmq定时消息相关
             if (null != scheduleMessageService) {
                 result = result && this.scheduleMessageService.load();
             }
@@ -198,11 +200,15 @@ public class DefaultMessageStore implements MessageStore {
             result = result && this.loadConsumeQueue();
 
             if (result) {
+                // 加载存储检测点
+                // 检测点主要记录commitlog文件，consumequeue文件，index索引文件的刷盘点，将在下次的文件刷盘机制中再次提交
                 this.storeCheckpoint =
                     new StoreCheckpoint(StorePathConfigHelper.getStoreCheckpoint(this.messageStoreConfig.getStorePathRootDir()));
 
+                // 加载index文件
                 this.indexService.load(lastExitOK);
 
+                // 根据broker是否异常退出，执行不同的恢复策略
                 this.recover(lastExitOK);
 
                 log.info("load over, and the max phy offset = {}", this.getMaxPhyOffset());
@@ -1568,6 +1574,7 @@ public class DefaultMessageStore implements MessageStore {
             switch (tranType) {
                 case MessageSysFlag.TRANSACTION_NOT_TYPE:
                 case MessageSysFlag.TRANSACTION_COMMIT_TYPE:
+                    // 消息分发
                     DefaultMessageStore.this.putMessagePositionInfo(request);
                     break;
                 case MessageSysFlag.TRANSACTION_PREPARED_TYPE:
@@ -1619,12 +1626,16 @@ public class DefaultMessageStore implements MessageStore {
         private void deleteExpiredFiles() {
             int deleteCount = 0;
             // 文件保留时间，从最后一次更新时间到现在，如果超过了该时间，则任务是过期文件，可以删除
+            // 默认72小时
             long fileReservedTime = DefaultMessageStore.this.getMessageStoreConfig().getFileReservedTime();
-            // 删除物理文件的间隔
+            // 删除物理文件的间隔，因为在一次清除过程中，可以被删除的文件不止一个，该值指定两次删除文件的时间间隔
+            // 默认100
             int deletePhysicFilesInterval = DefaultMessageStore.this.getMessageStoreConfig().getDeleteCommitLogFilesInterval();
             int destroyMapedFileIntervalForcibly = DefaultMessageStore.this.getMessageStoreConfig().getDestroyMapedFileIntervalForcibly();
 
+            // 当前时间是凌晨4点
             boolean timeup = this.isTimeToDelete();
+            // 磁盘空间不足
             boolean spacefull = this.isSpaceToDelete();
             boolean manualDelete = this.manualDeleteFileSeveralTimes > 0;
 
@@ -1671,6 +1682,7 @@ public class DefaultMessageStore implements MessageStore {
         }
 
         private boolean isTimeToDelete() {
+            // 04
             String when = DefaultMessageStore.this.getMessageStoreConfig().getDeleteWhen();
             if (UtilAll.isItTimeToDo(when)) {
                 DefaultMessageStore.log.info("it's time to reclaim disk space, " + when);

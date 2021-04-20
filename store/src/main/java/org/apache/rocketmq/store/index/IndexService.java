@@ -48,7 +48,9 @@ public class IndexService {
 
     public IndexService(final DefaultMessageStore store) {
         this.defaultMessageStore = store;
+        // 默认 5000000
         this.hashSlotNum = store.getMessageStoreConfig().getMaxHashSlotNum();
+        // 默认 5000000 * 4
         this.indexNum = store.getMessageStoreConfig().getMaxIndexNum();
         this.storePath =
             StorePathConfigHelper.getStorePathIndex(store.getMessageStoreConfig().getStorePathRootDir());
@@ -198,9 +200,13 @@ public class IndexService {
         return topic + "#" + key;
     }
 
+    /**
+     * 构建索引文件
+     */
     public void buildIndex(DispatchRequest req) {
         IndexFile indexFile = retryGetAndCreateIndexFile();
         if (indexFile != null) {
+            // 获得文件最大偏移量
             long endPhyOffset = indexFile.getEndPhyOffset();
             DispatchRequest msg = req;
             String topic = msg.getTopic();
@@ -227,6 +233,7 @@ public class IndexService {
                 }
             }
 
+            // 一个消息可以有多个message key
             if (keys != null && keys.length() > 0) {
                 String[] keyset = keys.split(MessageConst.KEY_SEPARATOR);
                 for (int i = 0; i < keyset.length; i++) {
