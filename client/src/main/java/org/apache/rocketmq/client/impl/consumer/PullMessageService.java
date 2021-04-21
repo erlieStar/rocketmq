@@ -77,6 +77,7 @@ public class PullMessageService extends ServiceThread {
     }
 
     private void pullMessage(final PullRequest pullRequest) {
+        // 根据消费组名获取对应的consumer
         final MQConsumerInner consumer = this.mQClientFactory.selectConsumer(pullRequest.getConsumerGroup());
         if (consumer != null) {
             DefaultMQPushConsumerImpl impl = (DefaultMQPushConsumerImpl) consumer;
@@ -86,6 +87,9 @@ public class PullMessageService extends ServiceThread {
         }
     }
 
+    /**
+     * 客户端启动后不断从阻塞队列中获取消息拉取任务
+     */
     @Override
     public void run() {
         log.info(this.getServiceName() + " service started");

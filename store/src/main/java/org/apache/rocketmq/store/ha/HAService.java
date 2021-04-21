@@ -107,8 +107,10 @@ public class HAService {
     // }
 
     /**
-     * 主服务器启动，并在特定端口上监听从服务器的连接
-     *
+     * 1. 主服务器启动，并在特定端口上监听从服务器的连接
+     * 2. 从服务器主动连接从服务器，发送待拉取偏移量
+     * 3. 主服务器解析请求并返回消息给从服务器
+     * 4. 从服务器保存消息并继续发送新的消息同步请求
      */
     public void start() throws Exception {
         this.acceptSocketService.beginAccept();
@@ -212,6 +214,7 @@ public class HAService {
 
                     if (selected != null) {
                         for (SelectionKey k : selected) {
+                            // 处理连接就绪事件
                             if ((k.readyOps() & SelectionKey.OP_ACCEPT) != 0) {
                                 SocketChannel sc = ((ServerSocketChannel) k.channel()).accept();
 
@@ -220,6 +223,7 @@ public class HAService {
                                         + sc.socket().getRemoteSocketAddress());
 
                                     try {
+                                        // HAConnection负责数据同步逻辑
                                         HAConnection conn = new HAConnection(HAService.this, sc);
                                         conn.start();
                                         HAService.this.addConnection(conn);

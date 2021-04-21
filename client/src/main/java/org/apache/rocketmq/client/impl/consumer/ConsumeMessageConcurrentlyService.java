@@ -198,6 +198,9 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         return result;
     }
 
+    /**
+     * 提交消费请求
+     */
     @Override
     public void submitConsumeRequest(
         final List<MessageExt> msgs,
@@ -213,7 +216,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
                 this.submitConsumeRequestLater(consumeRequest);
             }
         } else {
-
+            // 拉取的消息条数大于consumeBatchSize，则对拉取消息进行分页，每页consumeBatchSize条消息
             for (int total = 0; total < msgs.size(); ) {
                 List<MessageExt> msgThis = new ArrayList<MessageExt>(consumeBatchSize);
                 for (int i = 0; i < consumeBatchSize; i++, total++) {

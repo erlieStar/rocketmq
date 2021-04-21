@@ -236,6 +236,8 @@ public class MQClientInstance {
                     // Start various schedule tasks
                     this.startScheduledTask();
                     // Start pull service
+                    // 开始拉取消息
+                    // 会执行 PullMessageService#run 方法
                     this.pullMessageService.start();
                     // Start rebalance service
                     this.rebalanceService.start();
@@ -292,6 +294,7 @@ public class MQClientInstance {
             }
         }, 1000, this.clientConfig.getHeartbeatBrokerInterval(), TimeUnit.MILLISECONDS);
 
+        // 持久化消息消费进度
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

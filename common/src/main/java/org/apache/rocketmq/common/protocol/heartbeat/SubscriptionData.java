@@ -27,13 +27,17 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SubscriptionData implements Comparable<SubscriptionData> {
+    // 过滤模式，默认为全匹配
     public final static String SUB_ALL = "*";
+    // 是否是类过滤模式
     private boolean classFilterMode = false;
     private String topic;
+    // 消息过滤表达式
     private String subString;
     private Set<String> tagsSet = new HashSet<String>();
     private Set<Integer> codeSet = new HashSet<Integer>();
     private long subVersion = System.currentTimeMillis();
+    // 过滤类型
     private String expressionType = ExpressionType.TAG;
 
     @JSONField(serialize = false)

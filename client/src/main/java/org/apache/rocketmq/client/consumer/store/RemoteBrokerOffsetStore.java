@@ -79,6 +79,7 @@ public class RemoteBrokerOffsetStore implements OffsetStore {
             switch (type) {
                 case MEMORY_FIRST_THEN_STORE:
                 case READ_FROM_MEMORY: {
+                    // 从内存中读
                     AtomicLong offset = this.offsetTable.get(mq);
                     if (offset != null) {
                         return offset.get();
@@ -87,6 +88,7 @@ public class RemoteBrokerOffsetStore implements OffsetStore {
                     }
                 }
                 case READ_FROM_STORE: {
+                    // 从磁盘读取，则发送网络请求
                     try {
                         long brokerOffset = this.fetchConsumeOffsetFromBroker(mq);
                         AtomicLong offset = new AtomicLong(brokerOffset);

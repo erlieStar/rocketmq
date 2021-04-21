@@ -51,6 +51,7 @@ public class ProcessQueue {
     private final Lock lockConsume = new ReentrantLock();
     /**
      * A subset of msgTreeMap, will only be used when orderly consume
+     * 消息存储容器，key -> ConsumeQueue中的偏移量 value -> 消息实体
      */
     private final TreeMap<Long, MessageExt> consumingMsgOrderlyTreeMap = new TreeMap<Long, MessageExt>();
     private final AtomicLong tryUnlockTimes = new AtomicLong(0);
@@ -61,6 +62,7 @@ public class ProcessQueue {
     private volatile boolean locked = false;
     private volatile long lastLockTimestamp = System.currentTimeMillis();
     private volatile boolean consuming = false;
+    // ProcessQueue中总消息数
     private volatile long msgAccCnt = 0;
 
     public boolean isLockExpired() {
