@@ -67,6 +67,7 @@ public abstract class ConfigManager {
 
     public abstract void decode(final String jsonString);
 
+    // 持久化延时消息的消费进度
     public synchronized void persist() {
         String jsonString = this.encode(true);
         if (jsonString != null) {
