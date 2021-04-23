@@ -30,6 +30,7 @@ public class IndexHeader {
     private static int beginPhyoffsetIndex = 16;
     // 消息的最大物理偏移量
     private static int endPhyoffsetIndex = 24;
+    // hashSlot的个数
     private static int hashSlotcountIndex = 32;
     private static int indexCountIndex = 36;
     private final ByteBuffer byteBuffer;

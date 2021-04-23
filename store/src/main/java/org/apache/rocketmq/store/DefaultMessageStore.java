@@ -807,6 +807,7 @@ public class DefaultMessageStore implements MessageStore {
         return null;
     }
 
+    // 根据偏移量查找单个消息
     @Override
     public SelectMappedBufferResult selectOneMessageByOffset(long commitLogOffset) {
         SelectMappedBufferResult sbr = this.commitLog.getMessage(commitLogOffset, 4);

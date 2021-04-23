@@ -86,6 +86,8 @@ public interface MQAdmin {
      *
      * @param offsetMsgId message id
      * @return message
+     *
+     * 仅接收offsetMsgId，返回单条消息
      */
     MessageExt viewMessage(final String offsetMsgId) throws RemotingException, MQBrokerException,
         InterruptedException, MQClientException;
@@ -99,12 +101,15 @@ public interface MQAdmin {
      * @param begin from when
      * @param end to when
      * @return Instance of QueryResult
+     *
+     * 在指定topic下，根据key进行查询，指定最大返回条数，以及开始时间和结束时间
      */
     QueryResult queryMessage(final String topic, final String key, final int maxNum, final long begin,
         final long end) throws MQClientException, InterruptedException;
 
     /**
      * @return The {@code MessageExt} of given msgId
+     * 传入 offsetMsgId，msgId都可以，返回单条消息
      */
     MessageExt viewMessage(String topic,
         String msgId) throws RemotingException, MQBrokerException, InterruptedException, MQClientException;

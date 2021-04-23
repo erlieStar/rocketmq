@@ -260,6 +260,7 @@ public class MQAdminImpl {
 
         MessageId messageId = null;
         try {
+            // 从msgId解析出具体的broker地址和偏移量
             messageId = MessageDecoder.decodeMessageId(msgId);
         } catch (Exception e) {
             throw new MQClientException(ResponseCode.NO_MESSAGE, "query message by id finished, but no message.");

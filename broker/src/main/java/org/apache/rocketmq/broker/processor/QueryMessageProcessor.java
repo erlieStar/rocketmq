@@ -53,8 +53,10 @@ public class QueryMessageProcessor extends AsyncNettyRequestProcessor implements
         throws RemotingCommandException {
         switch (request.getCode()) {
             case RequestCode.QUERY_MESSAGE:
+                // 根据topic，开始时间，结束时间 查询消息
                 return this.queryMessage(ctx, request);
             case RequestCode.VIEW_MESSAGE_BY_ID:
+                // 根据 offsetMsgId 查询消息
                 return this.viewMessageById(ctx, request);
             default:
                 break;
