@@ -29,12 +29,16 @@ public class BloomFilter {
     public static final Charset UTF_8 = Charset.forName("UTF-8");
 
     // as error rate, 10/100 = 0.1
+    // 最大容错率
     private int f = 10;
+    // 可能插入n个元素
     private int n = 128;
 
     // hash function num, by calculation.
+    // k个哈希函数
     private int k;
     // bit count, by calculation.
+    // 数组总共m位
     private int m;
 
     /**

@@ -52,6 +52,7 @@ public class DefaultConsumerIdsChangeListener implements ConsumerIdsChangeListen
                 this.brokerController.getConsumerFilterManager().unRegister(group);
                 break;
             case REGISTER:
+                // consumer 注册
                 if (args == null || args.length < 1) {
                     return;
                 }

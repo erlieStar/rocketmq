@@ -134,6 +134,9 @@ public class ConsumerFilterManager extends ConfigManager {
         }
     }
 
+    /**
+     * 注册过滤信息
+     */
     public boolean register(final String topic, final String consumerGroup, final String expression,
         final String type, final long clientVersion) {
         if (ExpressionType.isTagType(type)) {

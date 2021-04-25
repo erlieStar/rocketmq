@@ -57,6 +57,14 @@ public class ExpressionMessageFilter implements MessageFilter {
         }
     }
 
+    /**
+     * 根据consumerQueue判断消息是否符合
+     * 适用于tag过滤的方式
+     *
+     * @param tagsCode tagsCode 消息 tag 的 hashcode
+     * @param cqExtUnit extend unit of consume queue
+     * @return
+     */
     @Override
     public boolean isMatchedByConsumeQueue(Long tagsCode, ConsumeQueueExt.CqExtUnit cqExtUnit) {
         if (null == subscriptionData) {
@@ -114,6 +122,14 @@ public class ExpressionMessageFilter implements MessageFilter {
         return true;
     }
 
+    /**
+     * 根据 commitLog 文件中的内容判断是否符合条件
+     * 适用于sql92语法过滤
+     *
+     * @param msgBuffer message buffer in commit log, may be null if not invoked in store. 消息内容，如果为空，方法返回true
+     * @param properties message properties, should decode from buffer if null by yourself. 消息属性，用于sql92过滤模式
+     * @return
+     */
     @Override
     public boolean isMatchedByCommitLog(ByteBuffer msgBuffer, Map<String, String> properties) {
         if (subscriptionData == null) {

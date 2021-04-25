@@ -384,6 +384,9 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
             return processQueue;
         }
 
+        /**
+         * 消息拉取回来后开始处理
+         */
         @Override
         public void run() {
             if (this.processQueue.isDropped()) {

@@ -918,6 +918,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 topic, subExpression);
             this.rebalanceImpl.getSubscriptionInner().put(topic, subscriptionData);
             if (this.mQClientFactory != null) {
+                // 将话题的注册信息上传至broker服务器端，方便在broker端进行匹配
                 this.mQClientFactory.sendHeartbeatToAllBrokerWithLock();
             }
         } catch (Exception e) {

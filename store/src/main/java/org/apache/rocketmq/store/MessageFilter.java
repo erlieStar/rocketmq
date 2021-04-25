@@ -24,7 +24,7 @@ public interface MessageFilter {
      * match by tags code or filter bit map which is calculated when message received
      * and stored in consume queue ext.
      *
-     * 根据consumequeue判断消息是否匹配
+     * 根据consumeQueue判断消息是否匹配
      *
      * @param tagsCode tagsCode 消息 tag 的 hashcode
      * @param cqExtUnit extend unit of consume queue

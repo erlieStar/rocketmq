@@ -34,7 +34,9 @@ public class SubscriptionData implements Comparable<SubscriptionData> {
     private String topic;
     // 消息过滤表达式
     private String subString;
+    // 存储tag
     private Set<String> tagsSet = new HashSet<String>();
+    // 存储tag的hashCode
     private Set<Integer> codeSet = new HashSet<Integer>();
     private long subVersion = System.currentTimeMillis();
     // 过滤类型
