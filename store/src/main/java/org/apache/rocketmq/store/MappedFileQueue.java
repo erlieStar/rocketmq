@@ -39,6 +39,7 @@ public class MappedFileQueue {
 
     private final int mappedFileSize;
 
+    // 存储所有的 commitLog
     private final CopyOnWriteArrayList<MappedFile> mappedFiles = new CopyOnWriteArrayList<MappedFile>();
 
     private final AllocateMappedFileService allocateMappedFileService;

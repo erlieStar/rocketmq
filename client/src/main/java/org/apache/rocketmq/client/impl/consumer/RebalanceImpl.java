@@ -257,6 +257,7 @@ public abstract class RebalanceImpl {
                 break;
             }
             case CLUSTERING: {
+                // 获取 topic 对应的 queue
                 Set<MessageQueue> mqSet = this.topicSubscribeInfoTable.get(topic);
                 List<String> cidAll = this.mQClientFactory.findConsumerIdList(topic, consumerGroup);
                 if (null == mqSet) {
@@ -279,6 +280,7 @@ public abstract class RebalanceImpl {
 
                     AllocateMessageQueueStrategy strategy = this.allocateMessageQueueStrategy;
 
+                    // 调用 strategy 获取当前客户端需要消费的 queue
                     List<MessageQueue> allocateResult = null;
                     try {
                         allocateResult = strategy.allocate(

@@ -161,6 +161,7 @@ public class IndexService {
 
         long indexLastUpdateTimestamp = 0;
         long indexLastUpdatePhyoffset = 0;
+        // 最多64条
         maxNum = Math.min(maxNum, this.defaultMessageStore.getMessageStoreConfig().getMaxMsgsNumBatch());
         try {
             this.readWriteLock.readLock().lock();
@@ -173,6 +174,7 @@ public class IndexService {
                         indexLastUpdatePhyoffset = f.getEndPhyOffset();
                     }
 
+                    // 在时间范围内
                     if (f.isTimeMatched(begin, end)) {
 
                         f.selectPhyOffset(phyOffsets, buildKey(topic, key), maxNum, begin, end, lastFile);

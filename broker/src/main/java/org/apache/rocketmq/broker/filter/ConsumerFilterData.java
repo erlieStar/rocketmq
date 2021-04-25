@@ -33,7 +33,9 @@ public class ConsumerFilterData {
 
     private String consumerGroup;
     private String topic;
+    // 表达式
     private String expression;
+    // 编译后的表达式
     private String expressionType;
     private transient Expression compiledExpression;
     private long bornTime;
