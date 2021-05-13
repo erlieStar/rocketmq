@@ -275,6 +275,7 @@ public abstract class RebalanceImpl {
                     mqAll.addAll(mqSet);
 
                     // 首先对mqAll，cidAll排序
+                    // 保证同一个消费组看到的视图保持一致，确保同一个消费队列不会对多个消费者分配
                     Collections.sort(mqAll);
                     Collections.sort(cidAll);
 
@@ -299,6 +300,7 @@ public abstract class RebalanceImpl {
                         allocateResultSet.addAll(allocateResult);
                     }
 
+                    // 判断topic对应的消息队列是否有变化
                     boolean changed = this.updateProcessQueueTableInRebalance(topic, allocateResultSet, isOrder);
                     if (changed) {
                         log.info(
@@ -330,10 +332,17 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * @param topic
+     * @param mqSet 重新分配到的队列
+     * @param isOrder
+     * @return
+     */
     private boolean updateProcessQueueTableInRebalance(final String topic, final Set<MessageQueue> mqSet,
         final boolean isOrder) {
         boolean changed = false;
 
+        // 遍历原先所有的队列
         Iterator<Entry<MessageQueue, ProcessQueue>> it = this.processQueueTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<MessageQueue, ProcessQueue> next = it.next();
@@ -341,6 +350,7 @@ public abstract class RebalanceImpl {
             ProcessQueue pq = next.getValue();
 
             if (mq.getTopic().equals(topic)) {
+                // 新队列不包含原先的队列，停止原先队列消费
                 if (!mqSet.contains(mq)) {
                     pq.setDropped(true);
                     if (this.removeUnnecessaryMessageQueue(mq, pq)) {
@@ -349,11 +359,13 @@ public abstract class RebalanceImpl {
                         log.info("doRebalance, {}, remove unnecessary mq, {}", consumerGroup, mq);
                     }
                 } else if (pq.isPullExpired()) {
+                    // 队列拉取超时
                     switch (this.consumeType()) {
                         case CONSUME_ACTIVELY:
                             break;
                         case CONSUME_PASSIVELY:
                             pq.setDropped(true);
+                            // 移除不需要的消息队列的相关信息
                             if (this.removeUnnecessaryMessageQueue(mq, pq)) {
                                 it.remove();
                                 changed = true;
@@ -368,8 +380,10 @@ public abstract class RebalanceImpl {
             }
         }
 
+        // 遍历分配到的队列
         List<PullRequest> pullRequestList = new ArrayList<PullRequest>();
         for (MessageQueue mq : mqSet) {
+            // 原先队列不包含新分配的队列
             if (!this.processQueueTable.containsKey(mq)) {
                 if (isOrder && !this.lock(mq)) {
                     log.warn("doRebalance, {}, add a new mq failed, {}, because lock failed", consumerGroup, mq);
@@ -399,6 +413,7 @@ public abstract class RebalanceImpl {
             }
         }
 
+        // 往阻塞队列中存放消息
         this.dispatchPullRequest(pullRequestList);
 
         return changed;

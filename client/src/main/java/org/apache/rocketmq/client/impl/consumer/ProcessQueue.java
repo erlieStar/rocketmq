@@ -37,6 +37,8 @@ import org.apache.rocketmq.common.protocol.body.ProcessQueueInfo;
 
 /**
  * Queue consumption snapshot
+ * PullMessageService 将拉取到的消息放到 ProcessQueue 中
+ * 消息消费成功后从 ProcessQueue 中移除
  */
 public class ProcessQueue {
     public final static long REBALANCE_LOCK_MAX_LIVE_TIME =
