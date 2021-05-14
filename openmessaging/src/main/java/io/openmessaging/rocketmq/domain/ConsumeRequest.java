@@ -20,6 +20,9 @@ import org.apache.rocketmq.client.impl.consumer.ProcessQueue;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.message.MessageQueue;
 
+/**
+ * 拉取到的消息封装成 ConsumeRequest
+ */
 public class ConsumeRequest {
     private final MessageExt messageExt;
     private final MessageQueue messageQueue;
