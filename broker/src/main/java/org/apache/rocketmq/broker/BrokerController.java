@@ -232,6 +232,7 @@ public class BrokerController {
     }
 
     public boolean initialize() throws CloneNotSupportedException {
+        // 加载磁盘上的数据到内存
         boolean result = this.topicConfigManager.load();
 
         result = result && this.consumerOffsetManager.load();
@@ -240,6 +241,7 @@ public class BrokerController {
 
         if (result) {
             try {
+                // 创建消息存储管理组件
                 this.messageStore =
                     new DefaultMessageStore(this.messageStoreConfig, this.brokerStatsManager, this.messageArrivingListener,
                         this.brokerConfig);
@@ -480,6 +482,7 @@ public class BrokerController {
                     log.warn("FileWatchService created error, can't load the certificate dynamically");
                 }
             }
+            // 初始化事务相关的消息，初始化acl等
             initialTransaction();
             initialAcl();
             initialRpcHooks();
@@ -850,10 +853,12 @@ public class BrokerController {
     }
 
     public void start() throws Exception {
+        // 消息存储组件
         if (this.messageStore != null) {
             this.messageStore.start();
         }
 
+        // 启动netty服务器
         if (this.remotingServer != null) {
             this.remotingServer.start();
         }
@@ -866,6 +871,8 @@ public class BrokerController {
             this.fileWatchService.start();
         }
 
+        // broker通过netty发送请求给别人
+        // 比如broker发送请求到nameserver去注册以及心跳，都是通过这个组件
         if (this.brokerOuterAPI != null) {
             this.brokerOuterAPI.start();
         }
@@ -946,6 +953,7 @@ public class BrokerController {
             topicConfigWrapper.setTopicConfigTable(topicConfigTable);
         }
 
+        // 判断一下，是否需要注册
         if (forceRegister || needRegister(this.brokerConfig.getBrokerClusterName(),
             this.getBrokerAddr(),
             this.brokerConfig.getBrokerName(),
@@ -958,7 +966,7 @@ public class BrokerController {
 
     private void doRegisterBrokerAll(boolean checkOrderConfig, boolean oneway,
         TopicConfigSerializeWrapper topicConfigWrapper) {
-        // 开始注册
+        // 开始注册，获取结果，结果为list的原因是broker会把自己注册到所有的nameserver
         List<RegisterBrokerResult> registerBrokerResultList = this.brokerOuterAPI.registerBrokerAll(
             this.brokerConfig.getBrokerClusterName(),
             this.getBrokerAddr(),
