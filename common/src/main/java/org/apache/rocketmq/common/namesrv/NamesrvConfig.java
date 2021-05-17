@@ -35,9 +35,10 @@ public class NamesrvConfig {
     private String kvConfigPath = System.getProperty("user.home") + File.separator + "namesrv" + File.separator + "kvConfig.json";
     // nameserver默认配置文件路径
     private String configStorePath = System.getProperty("user.home") + File.separator + "namesrv" + File.separator + "namesrv.properties";
+    // 生产环境名称
     private String productEnvName = "center";
     private boolean clusterTest = false;
-    // 是否支持顺序消息
+    // 是否支持顺序消息，默认不支持
     private boolean orderMessageEnable = false;
 
     public boolean isOrderMessageEnable() {

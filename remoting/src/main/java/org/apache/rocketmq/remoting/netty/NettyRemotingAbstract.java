@@ -206,7 +206,9 @@ public abstract class NettyRemotingAbstract {
                                 doAfterRpcHooks(RemotingHelper.parseChannelRemoteAddr(ctx.channel()), cmd, response);
                                 if (!cmd.isOnewayRPC()) {
                                     if (response != null) {
+                                        // 设置请求编号
                                         response.setOpaque(opaque);
+                                        // 标记为响应消息
                                         response.markResponseType();
                                         try {
                                             ctx.writeAndFlush(response);

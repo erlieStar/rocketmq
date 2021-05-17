@@ -25,10 +25,12 @@ public class NettyServerConfig implements Cloneable {
     private int serverSelectorThreads = 3;
     private int serverOnewaySemaphoreValue = 256;
     private int serverAsyncSemaphoreValue = 64;
+    // 网络连接空闲超过120s，就会被关闭
     private int serverChannelMaxIdleTimeSeconds = 120;
 
     private int serverSocketSndBufSize = NettySystemConfig.socketSndbufSize;
     private int serverSocketRcvBufSize = NettySystemConfig.socketRcvbufSize;
+    // 是否启动 epoll io 模型
     private boolean serverPooledByteBufAllocatorEnable = true;
 
     /**

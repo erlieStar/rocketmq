@@ -80,6 +80,7 @@ public class NamesrvController {
 
         this.remotingServer = new NettyRemotingServer(this.nettyServerConfig, this.brokerHousekeepingService);
 
+        // netty 服务器的工作线程池
         this.remotingExecutor =
             Executors.newFixedThreadPool(nettyServerConfig.getServerWorkerThreads(), new ThreadFactoryImpl("RemotingExecutorThread_"));
 
@@ -156,6 +157,7 @@ public class NamesrvController {
     }
 
     public void start() throws Exception {
+        // 接收请求
         this.remotingServer.start();
 
         if (this.fileWatchService != null) {

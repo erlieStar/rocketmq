@@ -104,6 +104,7 @@ public class NamesrvStartup {
             }
         }
 
+        // 有 -p 选项，打印出 namesrvConfig 和 nettyServerConfig 配置信息
         if (commandLine.hasOption('p')) {
             InternalLogger console = InternalLoggerFactory.getLogger(LoggerName.NAMESRV_CONSOLE_NAME);
             MixAll.printObjectProperties(console, namesrvConfig);
@@ -111,8 +112,10 @@ public class NamesrvStartup {
             System.exit(0);
         }
 
+        // 将命令行中的配置选项，读取出来，覆盖到 namesrvConfig 中
         MixAll.properties2Object(ServerUtil.commandLine2Properties(commandLine), namesrvConfig);
 
+        // 设置 ROCKETMQ_HOME 环境变量
         if (null == namesrvConfig.getRocketmqHome()) {
             System.out.printf("Please set the %s variable in your environment to match the location of the RocketMQ installation%n", MixAll.ROCKETMQ_HOME_ENV);
             System.exit(-2);
