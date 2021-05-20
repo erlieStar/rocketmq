@@ -897,6 +897,7 @@ public class BrokerController {
 
         // 每隔30s上报broker信息到NameServer
         // 只能在[10s,60s]这个区间内
+        // 定时发送注册请求，起到一个心跳的作用
         this.scheduledExecutorService.scheduleAtFixedRate(new Runnable() {
 
             @Override

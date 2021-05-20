@@ -99,6 +99,9 @@ public class RouteInfoManager {
         return topicList.encode();
     }
 
+    /**
+     * 注册broker信息
+     */
     public RegisterBrokerResult registerBroker(
         final String clusterName,
         final String brokerAddr,
@@ -427,15 +430,21 @@ public class RouteInfoManager {
         return null;
     }
 
+    /**
+     * 每隔10s扫描一次不活跃的broker
+     */
     public void scanNotActiveBroker() {
         Iterator<Entry<String, BrokerLiveInfo>> it = this.brokerLiveTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<String, BrokerLiveInfo> next = it.next();
             long last = next.getValue().getLastUpdateTimestamp();
+            // 上一次心跳时间 + broker心跳超时时间（默认120s）< 当前时间
+            // broker2分钟没发送心跳了，就认为他已经死掉了
             if ((last + BROKER_CHANNEL_EXPIRED_TIME) < System.currentTimeMillis()) {
                 RemotingUtil.closeChannel(next.getValue().getChannel());
                 it.remove();
                 log.warn("The broker channel expired, {} {}ms", next.getKey(), BROKER_CHANNEL_EXPIRED_TIME);
+                // 从路由表里面剔除出去
                 this.onChannelDestroy(next.getKey(), next.getValue().getChannel());
             }
         }
