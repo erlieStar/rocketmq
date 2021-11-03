@@ -332,6 +332,7 @@ public class BrokerController {
                 Executors.newFixedThreadPool(this.brokerConfig.getConsumerManageThreadPoolNums(), new ThreadFactoryImpl(
                     "ConsumerManageThread_"));
 
+            // 注册不同消息的处理器
             this.registerProcessor();
 
             final long initialDelay = UtilAll.computeNextMorningTimeMillis() - System.currentTimeMillis();
@@ -550,6 +551,7 @@ public class BrokerController {
     public void registerProcessor() {
         /**
          * SendMessageProcessor
+         * 接收消息并存储
          */
         SendMessageProcessor sendProcessor = new SendMessageProcessor(this);
         sendProcessor.registerSendMessageHook(sendMessageHookList);
@@ -565,12 +567,16 @@ public class BrokerController {
         this.fastRemotingServer.registerProcessor(RequestCode.CONSUMER_SEND_MSG_BACK, sendProcessor, this.sendMessageExecutor);
         /**
          * PullMessageProcessor
+         * 处理消息拉取请求
          */
         this.remotingServer.registerProcessor(RequestCode.PULL_MESSAGE, this.pullMessageProcessor, this.pullMessageExecutor);
         this.pullMessageProcessor.registerConsumeMessageHook(consumeMessageHookList);
 
         /**
          * ReplyMessageProcessor
+         * 实现"Request-Reply"同步调用
+         * 即Producer 首先发出一条消息，消息经由 Broker 被 Consumer 获取并消费；Consumer 消费完这条消息后，会将针对该消息的响应作为另外一条消息发送出来，最终回到 Producer
+         * https://cloud.tencent.com/developer/news/592569
          */
         ReplyMessageProcessor replyMessageProcessor = new ReplyMessageProcessor(this);
         replyMessageProcessor.registerSendMessageHook(sendMessageHookList);

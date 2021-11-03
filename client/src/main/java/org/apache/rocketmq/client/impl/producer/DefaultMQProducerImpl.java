@@ -531,6 +531,11 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         return this.mqFaultStrategy.selectOneMessageQueue(tpInfo, lastBrokerName);
     }
 
+    /**
+     * @param brokerName
+     * @param currentLatency
+     * @param isolation 是否需要隔离
+     */
     public void updateFaultItem(final String brokerName, final long currentLatency, boolean isolation) {
         this.mqFaultStrategy.updateFaultItem(brokerName, currentLatency, isolation);
     }
@@ -583,6 +588,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                             msg.setTopic(this.defaultMQProducer.withNamespace(msg.getTopic()));
                         }
                         long costTime = beginTimestampPrev - beginTimestampFirst;
+                        // 发送超时了
                         if (timeout < costTime) {
                             callTimeout = true;
                             break;

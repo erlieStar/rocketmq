@@ -165,6 +165,7 @@ public abstract class AbstractSendMessageProcessor extends AsyncNettyRequestProc
 
     protected RemotingCommand msgCheck(final ChannelHandlerContext ctx,
         final SendMessageRequestHeader requestHeader, final RemotingCommand response) {
+        // 该broker是否有写权限
         if (!PermName.isWriteable(this.brokerController.getBrokerConfig().getBrokerPermission())
             && this.brokerController.getTopicConfigManager().isOrderTopic(requestHeader.getTopic())) {
             response.setCode(ResponseCode.NO_PERMISSION);
@@ -173,6 +174,7 @@ public abstract class AbstractSendMessageProcessor extends AsyncNettyRequestProc
             return response;
         }
 
+        // 对topic进行校验
         if (!TopicValidator.validateTopic(requestHeader.getTopic(), response)) {
             return response;
         }

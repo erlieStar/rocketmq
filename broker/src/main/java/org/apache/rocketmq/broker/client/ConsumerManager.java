@@ -96,10 +96,14 @@ public class ConsumerManager {
         }
     }
 
+    /**
+     * 根据订阅信息进行注册
+     */
     public boolean registerConsumer(final String group, final ClientChannelInfo clientChannelInfo,
         ConsumeType consumeType, MessageModel messageModel, ConsumeFromWhere consumeFromWhere,
         final Set<SubscriptionData> subList, boolean isNotifyConsumerIdsChangedEnable) {
 
+        // 获取消费组内的消费者信息
         ConsumerGroupInfo consumerGroupInfo = this.consumerTable.get(group);
         if (null == consumerGroupInfo) {
             ConsumerGroupInfo tmp = new ConsumerGroupInfo(group, consumeType, messageModel, consumeFromWhere);
@@ -110,6 +114,7 @@ public class ConsumerManager {
         boolean r1 =
             consumerGroupInfo.updateChannel(clientChannelInfo, consumeType, messageModel,
                 consumeFromWhere);
+        // 更新订阅信息
         boolean r2 = consumerGroupInfo.updateSubscription(subList);
 
         if (r1 || r2) {

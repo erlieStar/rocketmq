@@ -426,6 +426,7 @@ public class PullMessageProcessor extends AsyncNettyRequestProcessor implements 
                         int queueId = requestHeader.getQueueId();
                         PullRequest pullRequest = new PullRequest(request, channel, pollingTimeMills,
                             this.brokerController.getMessageStore().now(), offset, subscriptionData, messageFilter);
+                        // 调用 PullRequestHoldService 将请求挂起
                         this.brokerController.getPullRequestHoldService().suspendPullRequest(topic, queueId, pullRequest);
                         response = null;
                         break;
