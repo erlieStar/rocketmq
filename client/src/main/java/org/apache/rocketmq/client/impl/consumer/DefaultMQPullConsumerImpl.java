@@ -571,6 +571,7 @@ public class DefaultMQPullConsumerImpl implements MQConsumerInner {
         this.offsetStore.updateConsumeOffsetToBroker(mq, offset, isOneway);
     }
 
+    // 发送重试消息
     public void sendMessageBack(MessageExt msg, int delayLevel, final String brokerName, String consumerGroup)
         throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
         try {

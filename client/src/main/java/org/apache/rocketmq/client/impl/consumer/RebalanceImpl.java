@@ -214,9 +214,13 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * 开始执行重平衡
+     */
     public void doRebalance(final boolean isOrder) {
         Map<String, SubscriptionData> subTable = this.getSubscriptionInner();
         if (subTable != null) {
+            // 对每个队列的topic都重平衡
             for (final Map.Entry<String, SubscriptionData> entry : subTable.entrySet()) {
                 final String topic = entry.getKey();
                 try {
@@ -272,6 +276,7 @@ public abstract class RebalanceImpl {
                     List<MessageQueue> mqAll = new ArrayList<MessageQueue>();
                     mqAll.addAll(mqSet);
 
+                    // 排序保证视图一致
                     Collections.sort(mqAll);
                     Collections.sort(cidAll);
 
@@ -295,6 +300,7 @@ public abstract class RebalanceImpl {
                         allocateResultSet.addAll(allocateResult);
                     }
 
+                    // 消费者订阅的队列是否有变化
                     boolean changed = this.updateProcessQueueTableInRebalance(topic, allocateResultSet, isOrder);
                     if (changed) {
                         log.info(
@@ -326,10 +332,16 @@ public abstract class RebalanceImpl {
         }
     }
 
+    /**
+     * @param topic
+     * @param mqSet 新分配到的队列
+     * @param isOrder
+     */
     private boolean updateProcessQueueTableInRebalance(final String topic, final Set<MessageQueue> mqSet,
         final boolean isOrder) {
         boolean changed = false;
 
+        // 当前消费者已经分配到的队列
         Iterator<Entry<MessageQueue, ProcessQueue>> it = this.processQueueTable.entrySet().iterator();
         while (it.hasNext()) {
             Entry<MessageQueue, ProcessQueue> next = it.next();
@@ -337,7 +349,9 @@ public abstract class RebalanceImpl {
             ProcessQueue pq = next.getValue();
 
             if (mq.getTopic().equals(topic)) {
+                // 不包含旧的队列
                 if (!mqSet.contains(mq)) {
+                    // 停止消费
                     pq.setDropped(true);
                     if (this.removeUnnecessaryMessageQueue(mq, pq)) {
                         it.remove();
@@ -366,6 +380,7 @@ public abstract class RebalanceImpl {
 
         List<PullRequest> pullRequestList = new ArrayList<PullRequest>();
         for (MessageQueue mq : mqSet) {
+            // 新分配的队列
             if (!this.processQueueTable.containsKey(mq)) {
                 if (isOrder && !this.lock(mq)) {
                     log.warn("doRebalance, {}, add a new mq failed, {}, because lock failed", consumerGroup, mq);
@@ -373,8 +388,10 @@ public abstract class RebalanceImpl {
                 }
 
                 this.removeDirtyOffset(mq);
+                // 创建新的ProcessQueue与该队列对应
                 ProcessQueue pq = new ProcessQueue();
 
+                // 计算从哪开始拉取
                 long nextOffset = -1L;
                 try {
                     nextOffset = this.computePullFromWhereWithException(mq);
