@@ -319,6 +319,7 @@ public class ScheduleMessageService extends ConfigManager {
                         long nextOffset = offset;
                         int i = 0;
                         ConsumeQueueExt.CqExtUnit cqExtUnit = new ConsumeQueueExt.CqExtUnit();
+                        // ConsumeQueue每个消息的长度是20个字节
                         for (; i < bufferCQ.getSize(); i += ConsumeQueue.CQ_STORE_UNIT_SIZE) {
                             long offsetPy = bufferCQ.getByteBuffer().getLong();
                             int sizePy = bufferCQ.getByteBuffer().getInt();
@@ -343,7 +344,9 @@ public class ScheduleMessageService extends ConfigManager {
 
                             long countdown = deliverTimestamp - now;
 
+                            // 延时消息到时间没，到就从commitLog中取出来
                             if (countdown <= 0) {
+                                // 根据偏移量和消息大小从commitLog文件中加载完整的消息
                                 MessageExt msgExt =
                                     ScheduleMessageService.this.defaultMessageStore.lookMessageByOffset(
                                         offsetPy, sizePy);
@@ -356,6 +359,7 @@ public class ScheduleMessageService extends ConfigManager {
                                                 msgInner.getTopic(), msgInner);
                                             continue;
                                         }
+                                        // 将消息存入原来的队列
                                         PutMessageResult putMessageResult =
                                             ScheduleMessageService.this.writeMessageStore
                                                 .putMessage(msgInner);
@@ -394,6 +398,7 @@ public class ScheduleMessageService extends ConfigManager {
                                     }
                                 }
                             } else {
+                                // 差countdown到时间，重新创建一个countdown时间后的定时器
                                 ScheduleMessageService.this.timer.schedule(
                                     new DeliverDelayedMessageTimerTask(this.delayLevel, nextOffset),
                                     countdown);
@@ -429,7 +434,7 @@ public class ScheduleMessageService extends ConfigManager {
                     }
                 }
             } // end of if (cq != null)
-
+            // 没找到队列，就表示还没有重试消息，创建调度器，延迟100ms后重新调度
             ScheduleMessageService.this.timer.schedule(new DeliverDelayedMessageTimerTask(this.delayLevel,
                 failScheduleOffset), DELAY_FOR_A_WHILE);
         }

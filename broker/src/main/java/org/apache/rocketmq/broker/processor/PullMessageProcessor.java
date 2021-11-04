@@ -414,6 +414,7 @@ public class PullMessageProcessor extends AsyncNettyRequestProcessor implements 
                     break;
                 case ResponseCode.PULL_NOT_FOUND:
 
+                    // 没有拉取到消息时，通过长轮询方式拉取消息
                     if (brokerAllowSuspend && hasSuspendFlag) {
                         long pollingTimeMills = suspendTimeoutMillisLong;
                         if (!this.brokerController.getBrokerConfig().isLongPollingEnable()) {

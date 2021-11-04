@@ -26,6 +26,8 @@ import org.apache.rocketmq.common.MixAll;
 public class BrokerData implements Comparable<BrokerData> {
     private String cluster;
     private String brokerName;
+    // 0表示Master
+    // 1及其之后为Slave
     private HashMap<Long/* brokerId */, String/* broker address */> brokerAddrs;
 
     private final Random random = new Random();
