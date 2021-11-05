@@ -55,9 +55,12 @@ public class ProcessQueue {
      */
     private final TreeMap<Long, MessageExt> consumingMsgOrderlyTreeMap = new TreeMap<Long, MessageExt>();
     private final AtomicLong tryUnlockTimes = new AtomicLong(0);
+    // 最大队列偏移量
     private volatile long queueOffsetMax = 0L;
     private volatile boolean dropped = false;
+    // 消息拉取时间戳
     private volatile long lastPullTimestamp = System.currentTimeMillis();
+    // 消息消费时间戳
     private volatile long lastConsumeTimestamp = System.currentTimeMillis();
     private volatile boolean locked = false;
     private volatile long lastLockTimestamp = System.currentTimeMillis();

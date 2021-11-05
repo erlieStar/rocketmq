@@ -140,6 +140,7 @@ public class PullRequestHoldService extends ServiceThread {
                             match = request.getMessageFilter().isMatchedByCommitLog(null, properties);
                         }
 
+                        // 匹配到消息
                         if (match) {
                             try {
                                 this.brokerController.getPullMessageProcessor().executeRequestWhenWakeup(request.getClientChannel(),

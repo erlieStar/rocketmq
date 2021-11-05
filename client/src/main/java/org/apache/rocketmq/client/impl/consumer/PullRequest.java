@@ -21,7 +21,7 @@ import org.apache.rocketmq.common.message.MessageQueue;
 public class PullRequest {
     private String consumerGroup;
     private MessageQueue messageQueue;
-    // 消息处理队列
+    // 消息处理队列，从broker拉到的消息先放到ProcessQueue中，然后提交到消费者线程池消费
     private ProcessQueue processQueue;
     // messageQueue的偏移量
     private long nextOffset;
