@@ -68,30 +68,43 @@ import org.apache.rocketmq.store.stats.BrokerStatsManager;
 public class DefaultMessageStore implements MessageStore {
     private static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
+    // 消息配置属性
     private final MessageStoreConfig messageStoreConfig;
     // CommitLog
+    // commitLog文件存储实现
     private final CommitLog commitLog;
 
+    // 消息队列存储缓存表
     private final ConcurrentMap<String/* topic */, ConcurrentMap<Integer/* queueId */, ConsumeQueue>> consumeQueueTable;
 
+    // 消息队列文件刷盘
     private final FlushConsumeQueueService flushConsumeQueueService;
 
+    // 清除commitLog
     private final CleanCommitLogService cleanCommitLogService;
 
+    // 清楚consumerQueue
     private final CleanConsumeQueueService cleanConsumeQueueService;
 
+    // 索引实现类
     private final IndexService indexService;
 
+    // MappedFile分配服务
     private final AllocateMappedFileService allocateMappedFileService;
 
+    // commitLog消息分发，根据commigLog构建consumerQueue，IndexFile
     private final ReputMessageService reputMessageService;
 
+    // 存储ha机制
     private final HAService haService;
 
+    // 消息服务调度
     private final ScheduleMessageService scheduleMessageService;
 
+    // 消息存储服务
     private final StoreStatsService storeStatsService;
 
+    // 消息堆外内存缓存
     private final TransientStorePool transientStorePool;
 
     private final RunningFlags runningFlags = new RunningFlags();
@@ -99,16 +112,22 @@ public class DefaultMessageStore implements MessageStore {
 
     private final ScheduledExecutorService scheduledExecutorService =
         Executors.newSingleThreadScheduledExecutor(new ThreadFactoryImpl("StoreScheduledThread"));
+
+    // broker状态管理器
     private final BrokerStatsManager brokerStatsManager;
+
+    // 消息到达监听器
     private final MessageArrivingListener messageArrivingListener;
     private final BrokerConfig brokerConfig;
 
     private volatile boolean shutdown = true;
 
+    // 文件刷盘监测点
     private StoreCheckpoint storeCheckpoint;
 
     private AtomicLong printTimes = new AtomicLong(0);
 
+    // commitLog文件转发请求
     private final LinkedList<CommitLogDispatcher> dispatcherList;
 
     private RandomAccessFile lockFile;
@@ -394,6 +413,7 @@ public class DefaultMessageStore implements MessageStore {
             return PutMessageStatus.SERVICE_NOT_AVAILABLE;
         }
 
+        // slave不允许写入
         if (BrokerRole.SLAVE == this.messageStoreConfig.getBrokerRole()) {
             long value = this.printTimes.getAndIncrement();
             if ((value % 50000) == 0) {
@@ -479,6 +499,7 @@ public class DefaultMessageStore implements MessageStore {
         return resultFuture;
     }
 
+    // 存储消息
     @Override
     public PutMessageResult putMessage(MessageExtBrokerInner msg) {
         try {

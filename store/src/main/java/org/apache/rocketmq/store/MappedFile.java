@@ -43,19 +43,30 @@ import org.apache.rocketmq.store.util.LibC;
 import sun.nio.ch.DirectBuffer;
 
 public class MappedFile extends ReferenceResource {
+
+    // 操作系统每页大小，默认4k
     public static final int OS_PAGE_SIZE = 1024 * 4;
     protected static final InternalLogger log = InternalLoggerFactory.getLogger(LoggerName.STORE_LOGGER_NAME);
 
     private static final AtomicLong TOTAL_MAPPED_VIRTUAL_MEMORY = new AtomicLong(0);
 
     private static final AtomicInteger TOTAL_MAPPED_FILES = new AtomicInteger(0);
+
+    // 写指针
     protected final AtomicInteger wrotePosition = new AtomicInteger(0);
+
+    // 提交指针
     protected final AtomicInteger committedPosition = new AtomicInteger(0);
+
+    // 刷到磁盘的指针
     private final AtomicInteger flushedPosition = new AtomicInteger(0);
+
+    // 文件大小
     protected int fileSize;
     protected FileChannel fileChannel;
     /**
      * Message will put to here first, and then reput to FileChannel if writeBuffer is not null.
+     * 堆外内存ByteBuffer
      */
     protected ByteBuffer writeBuffer = null;
     protected TransientStorePool transientStorePool = null;
@@ -63,6 +74,7 @@ public class MappedFile extends ReferenceResource {
     private long fileFromOffset;
     private File file;
     private MappedByteBuffer mappedByteBuffer;
+    // 文件最后一次写入时间
     private volatile long storeTimestamp = 0;
     private boolean firstCreateInQueue = false;
 
@@ -206,6 +218,7 @@ public class MappedFile extends ReferenceResource {
 
         int currentPos = this.wrotePosition.get();
 
+        // 没超过文件大小
         if (currentPos < this.fileSize) {
             ByteBuffer byteBuffer = writeBuffer != null ? writeBuffer.slice() : this.mappedByteBuffer.slice();
             byteBuffer.position(currentPos);

@@ -29,6 +29,7 @@ public class Message implements Serializable {
     private int flag;
     private Map<String, String> properties;
     private byte[] body;
+    // 事务id，仅在事务消息中用到
     private String transactionId;
 
     public Message() {
