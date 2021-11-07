@@ -192,13 +192,15 @@ public class DefaultMQProducerImpl implements MQProducerInner {
             case CREATE_JUST:
                 this.serviceState = ServiceState.START_FAILED;
 
-                // 校验配置
+                // 校验 producerGroup 是否符合要求
                 this.checkConfig();
 
                 if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
+                    // 改变 instanceName 为进程id
                     this.defaultMQProducer.changeInstanceNameToPID();
                 }
 
+                // 一个 ip 只会创建一个 MQClientInstance 对象
                 this.mQClientFactory = MQClientManager.getInstance().getOrCreateMQClientInstance(this.defaultMQProducer, rpcHook);
 
                 boolean registerOK = mQClientFactory.registerProducer(this.defaultMQProducer.getProducerGroup(), this);
@@ -230,6 +232,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                 break;
         }
 
+        // 发送心跳到所有的broker
         this.mQClientFactory.sendHeartbeatToAllBrokerWithLock();
 
         this.startScheduledTask();
