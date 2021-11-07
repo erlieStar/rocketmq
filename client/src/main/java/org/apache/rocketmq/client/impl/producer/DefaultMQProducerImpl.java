@@ -196,13 +196,14 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                 this.checkConfig();
 
                 if (!this.defaultMQProducer.getProducerGroup().equals(MixAll.CLIENT_INNER_PRODUCER_GROUP)) {
-                    // 改变 instanceName 为进程id
+                    // 改变 instanceName 为进程id + 当前时间戳
                     this.defaultMQProducer.changeInstanceNameToPID();
                 }
 
-                // 一个 ip 只会创建一个 MQClientInstance 对象
+                //  创建 MQClientInstance 对象
                 this.mQClientFactory = MQClientManager.getInstance().getOrCreateMQClientInstance(this.defaultMQProducer, rpcHook);
 
+                // 校验 producerGroup 是否已经被使用过了
                 boolean registerOK = mQClientFactory.registerProducer(this.defaultMQProducer.getProducerGroup(), this);
                 if (!registerOK) {
                     this.serviceState = ServiceState.CREATE_JUST;
@@ -211,9 +212,11 @@ public class DefaultMQProducerImpl implements MQProducerInner {
                         null);
                 }
 
+                // 保存 topic 信息
                 this.topicPublishInfoTable.put(this.defaultMQProducer.getCreateTopicKey(), new TopicPublishInfo());
 
                 if (startFactory) {
+                    // 启动 MQClientInstance
                     mQClientFactory.start();
                 }
 

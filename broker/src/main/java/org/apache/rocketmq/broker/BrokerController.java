@@ -892,6 +892,7 @@ public class BrokerController {
             @Override
             public void run() {
                 try {
+                    // 每隔30s往 nameserver 注册信息
                     BrokerController.this.registerBrokerAll(true, false, brokerConfig.isForceRegister());
                 } catch (Throwable e) {
                     log.error("registerBrokerAll Exception", e);

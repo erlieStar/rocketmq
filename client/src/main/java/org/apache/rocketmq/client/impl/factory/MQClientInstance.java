@@ -242,9 +242,10 @@ public class MQClientInstance {
                     // 启动拉取消息服务
                     this.pullMessageService.start();
                     // Start rebalance service
-                    // 启动负载均很符合
+                    // 启动负载均衡服务
                     this.rebalanceService.start();
                     // Start push service
+                    // 启动消息推送服务
                     this.defaultMQProducer.getDefaultMQProducerImpl().start(false);
                     log.info("the client factory [{}] start OK", this.clientId);
                     this.serviceState = ServiceState.RUNNING;
