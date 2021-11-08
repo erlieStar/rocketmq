@@ -187,6 +187,7 @@ public class PullAPIWrapper {
             requestHeader.setMaxMsgNums(maxNums);
             requestHeader.setSysFlag(sysFlagInner);
             requestHeader.setCommitOffset(commitOffset);
+            // 设置broker最大阻塞时间，默认20s
             requestHeader.setSuspendTimeoutMillis(brokerSuspendMaxTimeMillis);
             requestHeader.setSubscription(subExpression);
             requestHeader.setSubVersion(subVersion);
@@ -197,6 +198,7 @@ public class PullAPIWrapper {
                 brokerAddr = computePullFromWhichFilterServer(mq.getTopic(), brokerAddr);
             }
 
+            // 开始消息拉取
             PullResult pullResult = this.mQClientFactory.getMQClientAPIImpl().pullMessage(
                 brokerAddr,
                 requestHeader,
