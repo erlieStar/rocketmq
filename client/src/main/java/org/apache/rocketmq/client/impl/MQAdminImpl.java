@@ -255,6 +255,7 @@ public class MQAdminImpl {
         throw new MQClientException("The broker[" + mq.getBrokerName() + "] not exist", null);
     }
 
+    // 根据messageId查询（依赖commitLog）
     public MessageExt viewMessage(
         String msgId) throws RemotingException, MQBrokerException, InterruptedException, MQClientException {
 
@@ -292,6 +293,8 @@ public class MQAdminImpl {
         }
     }
 
+    // 根据uniqueKey/mssageKey(依赖index和commitLog)
+    // 在这里再过滤一遍
     protected QueryResult queryMessage(String topic, String key, int maxNum, long begin, long end,
         boolean isUniqKey) throws MQClientException,
         InterruptedException {
