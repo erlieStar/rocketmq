@@ -1323,7 +1323,7 @@ public class DefaultMQProducerImpl implements MQProducerInner {
         }
 
         try {
-            // 结束事务，提交或回滚
+            // 结束事务，提交或回滚，向rocketmq发送请求
             this.endTransaction(msg, sendResult, localTransactionState, localException);
         } catch (Exception e) {
             log.warn("local transaction execute " + localTransactionState + ", but end broker transaction failed", e);
