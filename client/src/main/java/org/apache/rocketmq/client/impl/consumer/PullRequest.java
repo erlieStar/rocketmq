@@ -20,6 +20,7 @@ import org.apache.rocketmq.common.message.MessageQueue;
 
 public class PullRequest {
     private String consumerGroup;
+    // 待拉取的消息队列
     private MessageQueue messageQueue;
     // 消息处理队列，从broker拉到的消息先放到ProcessQueue中，然后提交到消费者线程池消费
     private ProcessQueue processQueue;

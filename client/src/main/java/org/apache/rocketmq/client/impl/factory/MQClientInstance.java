@@ -234,6 +234,7 @@ public class MQClientInstance {
                         this.mQClientAPIImpl.fetchNameServerAddr();
                     }
                     // Start request-response channel
+                    // 启动 NettyRemotingClient
                     this.mQClientAPIImpl.start();
                     // Start various schedule tasks
                     // 启动定时服务
