@@ -244,6 +244,7 @@ public abstract class RebalanceImpl {
         return subscriptionInner;
     }
 
+    // 创建拉取任务的开始过程
     private void rebalanceByTopic(final String topic, final boolean isOrder) {
         switch (messageModel) {
             case BROADCASTING: {
@@ -382,6 +383,7 @@ public abstract class RebalanceImpl {
             }
         }
 
+        // 新建的拉取任务
         List<PullRequest> pullRequestList = new ArrayList<PullRequest>();
         for (MessageQueue mq : mqSet) {
             // 新分配的队列

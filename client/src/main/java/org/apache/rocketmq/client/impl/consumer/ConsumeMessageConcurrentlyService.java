@@ -179,7 +179,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
     }
 
     /**
-     * 提交消费消息请求到线程池
+     * 从broker端拉到消息后，提交消费消息请求到线程池
      */
     @Override
     public void submitConsumeRequest(
@@ -187,7 +187,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         final ProcessQueue processQueue,
         final MessageQueue messageQueue,
         final boolean dispatchToConsume) {
-        // 1次消费几条
+        // 1次消费几条，默认是1条
         final int consumeBatchSize = this.defaultMQPushConsumer.getConsumeMessageBatchMaxSize();
         if (msgs.size() <= consumeBatchSize) {
             ConsumeRequest consumeRequest = new ConsumeRequest(msgs, processQueue, messageQueue);
@@ -298,6 +298,7 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         }
 
         // 不管消息消费成功与否，都会更新消费进度
+        // 将消费过的消息从 ProcessQueue 中删除
         long offset = consumeRequest.getProcessQueue().removeMessage(consumeRequest.getMsgs());
         if (offset >= 0 && !consumeRequest.getProcessQueue().isDropped()) {
             // 更新本地进度，后台定时任务会定时将消费进度同步到broker中
@@ -356,6 +357,11 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
         private final ProcessQueue processQueue;
         private final MessageQueue messageQueue;
 
+        /**
+         * @param msgs 消息对应的内容
+         * @param processQueue PullRequest 对应的 processQueue
+         * @param messageQueue PullRequest 对应的 messageQueue
+         */
         public ConsumeRequest(List<MessageExt> msgs, ProcessQueue processQueue, MessageQueue messageQueue) {
             this.msgs = msgs;
             this.processQueue = processQueue;
