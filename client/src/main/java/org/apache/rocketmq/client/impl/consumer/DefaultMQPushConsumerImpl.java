@@ -592,6 +592,7 @@ public class DefaultMQPushConsumerImpl implements MQConsumerInner {
                 // 对消费者配置的检查
                 this.checkConfig();
 
+                // 订阅重试主题
                 this.copySubscription();
 
                 if (this.defaultMQPushConsumer.getMessageModel() == MessageModel.CLUSTERING) {
