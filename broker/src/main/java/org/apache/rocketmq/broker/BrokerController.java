@@ -861,22 +861,27 @@ public class BrokerController {
             this.fastRemotingServer.start();
         }
 
+        // 用于ssl/tls
         if (this.fileWatchService != null) {
             this.fileWatchService.start();
         }
 
+        // 处理和发送网络请求
         if (this.brokerOuterAPI != null) {
             this.brokerOuterAPI.start();
         }
 
+        // 用来支持长轮询
         if (this.pullRequestHoldService != null) {
             this.pullRequestHoldService.start();
         }
 
+        // 定时清楚不活跃的连接
         if (this.clientHousekeepingService != null) {
             this.clientHousekeepingService.start();
         }
 
+        // 用来支持类过滤模式
         if (this.filterServerManager != null) {
             this.filterServerManager.start();
         }
@@ -900,10 +905,12 @@ public class BrokerController {
             }
         }, 1000 * 10, Math.max(10000, Math.min(brokerConfig.getRegisterNameServerPeriod(), 60000)), TimeUnit.MILLISECONDS);
 
+        // broker状态管理器
         if (this.brokerStatsManager != null) {
             this.brokerStatsManager.start();
         }
 
+        // 支持broker快速失败
         if (this.brokerFastFailure != null) {
             this.brokerFastFailure.start();
         }

@@ -190,6 +190,8 @@ public class SendMessageProcessor extends AbstractSendMessageProcessor implement
             }
         }
 
+        // 超过最大消费次数16次，或者 delayLevel < 0
+        // 则将消息投递到死信队列ScheduleMessageService
         if (msgExt.getReconsumeTimes() >= maxReconsumeTimes
             || delayLevel < 0) {
             newTopic = MixAll.getDLQTopic(requestHeader.getGroup());

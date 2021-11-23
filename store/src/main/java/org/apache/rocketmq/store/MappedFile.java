@@ -346,6 +346,7 @@ public class MappedFile extends ReferenceResource {
                 byteBuffer.position(lastCommittedPosition);
                 byteBuffer.limit(writePos);
                 this.fileChannel.position(lastCommittedPosition);
+                // 将  ByteBuffer 刷到 fileChannel
                 this.fileChannel.write(byteBuffer);
                 this.committedPosition.set(writePos);
             } catch (Throwable e) {
@@ -355,9 +356,12 @@ public class MappedFile extends ReferenceResource {
     }
 
     private boolean isAbleToFlush(final int flushLeastPages) {
+        // 上次刷盘的位置
         int flush = this.flushedPosition.get();
+        // 已写入的位置
         int write = getReadPosition();
 
+        // 文件写满必须要刷盘
         if (this.isFull()) {
             return true;
         }
