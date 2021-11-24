@@ -297,11 +297,10 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
                 break;
         }
 
-        // 不管消息消费成功与否，都会更新消费进度
-        // 将消费过的消息从 ProcessQueue 中删除
+        // 不管消息消费成功与否，将消费过的消息从 ProcessQueue 中删除
         long offset = consumeRequest.getProcessQueue().removeMessage(consumeRequest.getMsgs());
         if (offset >= 0 && !consumeRequest.getProcessQueue().isDropped()) {
-            // 更新本地进度，后台定时任务会定时将消费进度同步到broker中
+            // 不管消息消费成功与否，都会更新消费进度，将消费进度先暂存在本地，后台定时任务会定时将消费进度同步到broker中
             this.defaultMQPushConsumerImpl.getOffsetStore().updateOffset(consumeRequest.getMessageQueue(), offset, true);
         }
     }
@@ -458,8 +457,9 @@ public class ConsumeMessageConcurrentlyService implements ConsumeMessageService 
             ConsumeMessageConcurrentlyService.this.getConsumerStatsManager()
                 .incConsumeRT(ConsumeMessageConcurrentlyService.this.consumerGroup, messageQueue.getTopic(), consumeRT);
 
+            // 这块地方会造成消息的重复消费
+            // 队列没有被丢弃，则处理消费结果
             if (!processQueue.isDropped()) {
-                // 处理消费结果
                 ConsumeMessageConcurrentlyService.this.processConsumeResult(status, context, this);
             } else {
                 log.warn("processQueue is dropped without process consume result. messageQueue={}, msgs={}", messageQueue, msgs);

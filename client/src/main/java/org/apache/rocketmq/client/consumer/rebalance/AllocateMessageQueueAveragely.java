@@ -29,6 +29,12 @@ import org.apache.rocketmq.common.message.MessageQueue;
 public class AllocateMessageQueueAveragely implements AllocateMessageQueueStrategy {
     private final InternalLogger log = ClientLogger.getLog();
 
+    /**
+     * @param consumerGroup
+     * @param currentCID 当前客户端的唯一标识id
+     * @param mqAll 一个topic下的所有队列
+     * @param cidAll 一个topic下的所有消费者标识
+     */
     @Override
     public List<MessageQueue> allocate(String consumerGroup, String currentCID, List<MessageQueue> mqAll,
         List<String> cidAll) {
@@ -53,6 +59,7 @@ public class AllocateMessageQueueAveragely implements AllocateMessageQueueStrate
 
         int index = cidAll.indexOf(currentCID);
         int mod = mqAll.size() % cidAll.size();
+        // 队列数 <= 消费者数，每个消费者分1个
         int averageSize =
             mqAll.size() <= cidAll.size() ? 1 : (mod > 0 && index < mod ? mqAll.size() / cidAll.size()
                 + 1 : mqAll.size() / cidAll.size());
