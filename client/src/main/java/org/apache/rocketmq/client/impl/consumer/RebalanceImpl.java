@@ -287,6 +287,7 @@ public abstract class RebalanceImpl {
 
                     AllocateMessageQueueStrategy strategy = this.allocateMessageQueueStrategy;
 
+                    // 使用负载均衡策略算出当前Consumer应该消费的队列
                     List<MessageQueue> allocateResult = null;
                     try {
                         allocateResult = strategy.allocate(
@@ -305,7 +306,8 @@ public abstract class RebalanceImpl {
                         allocateResultSet.addAll(allocateResult);
                     }
 
-                    // 消费者订阅的队列是否有变化
+                    // 给新分配的 MessageQueue 创建对应的 PullRequest，放到阻塞队列中开始进行拉取
+                    // 如果之前的 MessageQueue 被分配给别的消费者消费了，则将 MessageQueue 对应的 ProcessQueue 的 dropped 属性设置为 true
                     boolean changed = this.updateProcessQueueTableInRebalance(topic, allocateResultSet, isOrder);
                     if (changed) {
                         log.info(
