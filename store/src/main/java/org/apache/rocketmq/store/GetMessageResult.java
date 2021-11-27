@@ -33,6 +33,7 @@ public class GetMessageResult {
 
     private int bufferTotalSize = 0;
 
+    // 消费者是否向从服务器拉取消息
     private boolean suggestPullingFromSlave = false;
 
     private int msgCount4Commercial = 0;

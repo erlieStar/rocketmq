@@ -64,4 +64,11 @@ public class LatencyFaultToleranceImplTest {
         latencyFaultTolerance.updateFaultItem(anotherBrokerName, 1001, 3000);
         assertThat(latencyFaultTolerance.pickOneAtLeast()).isEqualTo(brokerName);
     }
+
+
+    @Test
+    public void test() {
+        System.out.println(System.currentTimeMillis());
+    }
+
 }

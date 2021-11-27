@@ -557,6 +557,7 @@ public class HAService {
                     if (this.connectMaster()) {
 
                         if (this.isTimeToReportOffset()) {
+                            // 上报偏移量到主服务器
                             boolean result = this.reportSlaveMaxOffset(this.currentReportedOffset);
                             if (!result) {
                                 this.closeMaster();

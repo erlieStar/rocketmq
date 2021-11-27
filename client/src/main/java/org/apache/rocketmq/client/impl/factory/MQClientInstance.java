@@ -1023,6 +1023,12 @@ public class MQClientInstance {
         return null;
     }
 
+    /**
+     * @param brokerName broker名字
+     * @param brokerId bokerId，一个集群brokerName一样，但是brokerId不一样
+     * @param onlyThisBroker 是否必须返回brokerId对应的Broker
+     * @return
+     */
     public FindBrokerResult findBrokerAddressInSubscribe(
         final String brokerName,
         final long brokerId,
@@ -1043,6 +1049,7 @@ public class MQClientInstance {
                 found = brokerAddr != null;
             }
 
+            // 没有找到并且onlyThisBroker为false
             if (!found && !onlyThisBroker) {
                 Entry<Long, String> entry = map.entrySet().iterator().next();
                 brokerAddr = entry.getValue();
