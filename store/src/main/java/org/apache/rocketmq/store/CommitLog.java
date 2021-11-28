@@ -668,6 +668,7 @@ public class CommitLog {
                 return CompletableFuture.completedFuture(new PutMessageResult(PutMessageStatus.CREATE_MAPEDFILE_FAILED, null));
             }
 
+            // 往 mappedFile 中写入消息
             result = mappedFile.appendMessage(msg, this.appendMessageCallback, putMessageContext);
             switch (result.getStatus()) {
                 case PUT_OK:
@@ -861,6 +862,7 @@ public class CommitLog {
                 GroupCommitRequest request = new GroupCommitRequest(result.getWroteOffset() + result.getWroteBytes(),
                         this.defaultMessageStore.getMessageStoreConfig().getSyncFlushTimeout());
                 service.putRequest(request);
+                // 等待 mappedFile 刷盘成功
                 return request.future();
             } else {
                 service.wakeup();
@@ -1036,6 +1038,7 @@ public class CommitLog {
                 }
 
                 try {
+                    // 进行 commit 操作
                     boolean result = CommitLog.this.mappedFileQueue.commit(commitDataLeastPages);
                     long end = System.currentTimeMillis();
                     if (!result) {
@@ -1072,6 +1075,7 @@ public class CommitLog {
             CommitLog.log.info(this.getServiceName() + " service started");
 
             while (!this.isStopped()) {
+                // 定时刷盘开关
                 boolean flushCommitLogTimed = CommitLog.this.defaultMessageStore.getMessageStoreConfig().isFlushCommitLogTimed();
 
                 // 每次刷盘的间隔时间，默认500ms
@@ -1151,7 +1155,7 @@ public class CommitLog {
     public static class GroupCommitRequest {
         // 刷盘偏移量
         private final long nextOffset;
-        // 刷盘完成future
+        // 等待刷盘完成
         private CompletableFuture<PutMessageStatus> flushOKFuture = new CompletableFuture<>();
         private final long startTimestamp = System.currentTimeMillis();
         private long timeoutMillis = Long.MAX_VALUE;
@@ -1190,6 +1194,7 @@ public class CommitLog {
         private volatile LinkedList<GroupCommitRequest> requestsRead = new LinkedList<GroupCommitRequest>();
         private final PutMessageSpinLock lock = new PutMessageSpinLock();
 
+        // 将请求放到队列中
         public synchronized void putRequest(final GroupCommitRequest request) {
             lock.lock();
             try {
@@ -1216,6 +1221,7 @@ public class CommitLog {
                 for (GroupCommitRequest req : this.requestsRead) {
                     // There may be a message in the next file, so a maximum of
                     // two times the flush
+                    // 已经刷盘的位置 >= 内存缓冲区的位置
                     // 判断是否已经刷过盘了
                     boolean flushOK = CommitLog.this.mappedFileQueue.getFlushedWhere() >= req.getNextOffset();
                     for (int i = 0; i < 2 && !flushOK; i++) {
@@ -1223,7 +1229,7 @@ public class CommitLog {
                         CommitLog.this.mappedFileQueue.flush(0);
                         flushOK = CommitLog.this.mappedFileQueue.getFlushedWhere() >= req.getNextOffset();
                     }
-
+                    // 唤醒等待刷盘线程
                     req.wakeupCustomer(flushOK ? PutMessageStatus.PUT_OK : PutMessageStatus.FLUSH_DISK_TIMEOUT);
                 }
 
@@ -1240,11 +1246,13 @@ public class CommitLog {
             }
         }
 
+        // 执行刷盘
         public void run() {
             CommitLog.log.info(this.getServiceName() + " service started");
 
             while (!this.isStopped()) {
                 try {
+                    // 有数据过来会结束等待的
                     this.waitForRunning(10);
                     this.doCommit();
                 } catch (Exception e) {
@@ -1302,6 +1310,7 @@ public class CommitLog {
             this.maxMessageSize = size;
         }
 
+        // 追加单条消息
         public AppendMessageResult doAppend(final long fileFromOffset, final ByteBuffer byteBuffer, final int maxBlank,
             final MessageExtBrokerInner msgInner, PutMessageContext putMessageContext) {
             // STORETIMESTAMP + STOREHOSTADDRESS + OFFSET <br>

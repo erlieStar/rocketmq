@@ -206,6 +206,7 @@ public class MappedFileQueue {
         }
 
         if (mappedFileLast != null && mappedFileLast.isFull()) {
+            // 计算将要创建的映射文件的物理偏移量
             createOffset = mappedFileLast.getFileFromOffset() + this.mappedFileSize;
         }
 
@@ -217,6 +218,7 @@ public class MappedFileQueue {
     }
 
     protected MappedFile tryCreateMappedFile(long createOffset) {
+        // 同时创建2个文件
         String nextFilePath = this.storePath + File.separator + UtilAll.offset2FileName(createOffset);
         String nextNextFilePath = this.storePath + File.separator + UtilAll.offset2FileName(createOffset
                 + this.mappedFileSize);
@@ -227,6 +229,7 @@ public class MappedFileQueue {
         MappedFile mappedFile = null;
 
         if (this.allocateMappedFileService != null) {
+            // 创建请求放到阻塞队列
             mappedFile = this.allocateMappedFileService.putRequestAndReturnMappedFile(nextFilePath,
                     nextNextFilePath, this.mappedFileSize);
         } else {

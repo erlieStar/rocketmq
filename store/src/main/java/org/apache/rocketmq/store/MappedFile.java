@@ -224,6 +224,7 @@ public class MappedFile extends ReferenceResource {
             byteBuffer.position(currentPos);
             AppendMessageResult result;
             if (messageExt instanceof MessageExtBrokerInner) {
+                // cb 为 Callback
                 result = cb.doAppend(this.getFileFromOffset(), byteBuffer, this.fileSize - currentPos,
                         (MessageExtBrokerInner) messageExt, putMessageContext);
             } else if (messageExt instanceof MessageExtBatch) {
@@ -232,6 +233,7 @@ public class MappedFile extends ReferenceResource {
             } else {
                 return new AppendMessageResult(AppendMessageStatus.UNKNOWN_ERROR);
             }
+            // 修改写位置
             this.wrotePosition.addAndGet(result.getWroteBytes());
             this.storeTimestamp = result.getStoreTimestamp();
             return result;
@@ -288,8 +290,10 @@ public class MappedFile extends ReferenceResource {
      * @return The current flushed position
      */
     public int flush(final int flushLeastPages) {
+        // 是否可以刷盘
         if (this.isAbleToFlush(flushLeastPages)) {
             if (this.hold()) {
+                // todo
                 int value = getReadPosition();
 
                 try {
@@ -355,6 +359,7 @@ public class MappedFile extends ReferenceResource {
         }
     }
 
+    // 有可能需要累计到一定程度才刷
     private boolean isAbleToFlush(final int flushLeastPages) {
         // 上次刷盘的位置
         int flush = this.flushedPosition.get();
@@ -540,6 +545,7 @@ public class MappedFile extends ReferenceResource {
         log.info("mapped file warm-up done. mappedFile={}, costTime={}", this.getFileName(),
             System.currentTimeMillis() - beginTime);
 
+        // 将当前映射文件的地址锁定在pagecache，防止被交换到swap空间
         this.mlock();
     }
 
