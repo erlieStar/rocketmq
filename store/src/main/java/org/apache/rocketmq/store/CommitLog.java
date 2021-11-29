@@ -858,19 +858,22 @@ public class CommitLog {
         // Synchronization flush
         if (FlushDiskType.SYNC_FLUSH == this.defaultMessageStore.getMessageStoreConfig().getFlushDiskType()) {
             final GroupCommitService service = (GroupCommitService) this.flushCommitLogService;
+            // 是否需要等待消息刷盘完成
             if (messageExt.isWaitStoreMsgOK()) {
                 GroupCommitRequest request = new GroupCommitRequest(result.getWroteOffset() + result.getWroteBytes(),
                         this.defaultMessageStore.getMessageStoreConfig().getSyncFlushTimeout());
                 service.putRequest(request);
-                // 等待 mappedFile 刷盘成功
+                // 阻塞等待消息刷盘完成
                 return request.future();
             } else {
+                // 不需要的话变成异步刷盘
                 service.wakeup();
                 return CompletableFuture.completedFuture(PutMessageStatus.PUT_OK);
             }
         }
         // Asynchronous flush
         else {
+            // 是否开启 transientStorePool
             if (!this.defaultMessageStore.getMessageStoreConfig().isTransientStorePoolEnable()) {
                 flushCommitLogService.wakeup();
             } else  {

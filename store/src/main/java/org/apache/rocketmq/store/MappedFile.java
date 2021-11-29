@@ -224,7 +224,6 @@ public class MappedFile extends ReferenceResource {
             byteBuffer.position(currentPos);
             AppendMessageResult result;
             if (messageExt instanceof MessageExtBrokerInner) {
-                // cb 为 Callback
                 result = cb.doAppend(this.getFileFromOffset(), byteBuffer, this.fileSize - currentPos,
                         (MessageExtBrokerInner) messageExt, putMessageContext);
             } else if (messageExt instanceof MessageExtBatch) {
@@ -293,7 +292,6 @@ public class MappedFile extends ReferenceResource {
         // 是否可以刷盘
         if (this.isAbleToFlush(flushLeastPages)) {
             if (this.hold()) {
-                // todo
                 int value = getReadPosition();
 
                 try {
