@@ -110,6 +110,7 @@ public class AllocateMappedFileService extends ServiceThread {
                     return null;
                 } else {
                     this.requestTable.remove(nextFilePath);
+                    // 返回创建的 mappedFile
                     return result.getMappedFile();
                 }
             } else {
@@ -180,6 +181,7 @@ public class AllocateMappedFileService extends ServiceThread {
                         mappedFile.init(req.getFilePath(), req.getFileSize(), messageStore.getTransientStorePool());
                     } catch (RuntimeException e) {
                         log.warn("Use default implementation.");
+                        // 上面没有 spi 的实现类，所以会走如下方法
                         mappedFile = new MappedFile(req.getFilePath(), req.getFileSize(), messageStore.getTransientStorePool());
                     }
                 } else {
@@ -204,6 +206,7 @@ public class AllocateMappedFileService extends ServiceThread {
                         this.messageStore.getMessageStoreConfig().getFlushLeastPagesWhenWarmMapedFile());
                 }
 
+                // 将创建完成的 mappedFile 放到 AllocateRequest
                 req.setMappedFile(mappedFile);
                 this.hasException = false;
                 isSuccess = true;

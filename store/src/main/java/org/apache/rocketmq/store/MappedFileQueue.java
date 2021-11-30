@@ -229,7 +229,7 @@ public class MappedFileQueue {
         MappedFile mappedFile = null;
 
         if (this.allocateMappedFileService != null) {
-            // 创建请求放到阻塞队列
+            // 将创建请求放到阻塞队列
             mappedFile = this.allocateMappedFileService.putRequestAndReturnMappedFile(nextFilePath,
                     nextNextFilePath, this.mappedFileSize);
         } else {

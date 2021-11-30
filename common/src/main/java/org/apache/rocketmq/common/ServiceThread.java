@@ -127,6 +127,8 @@ public abstract class ServiceThread implements Runnable {
     }
 
     protected void waitForRunning(long interval) {
+        // 这个变量是用来保证当用户调用waitForRunning()时，如果发现已经有线程调用了wakeup()，
+        // 但是waitPoint还没有被释放的时候（count还不为0），可以立即退出（因为waitPoint马上就要被释放了）
         if (hasNotified.compareAndSet(true, false)) {
             this.onWaitEnd();
             return;

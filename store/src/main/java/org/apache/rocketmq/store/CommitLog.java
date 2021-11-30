@@ -660,6 +660,7 @@ public class CommitLog {
             msg.setStoreTimestamp(beginLockTimestamp);
 
             if (null == mappedFile || mappedFile.isFull()) {
+                // 创建 MappedFile
                 mappedFile = this.mappedFileQueue.getLastMappedFile(0); // Mark: NewFile may be cause noise
             }
             if (null == mappedFile) {
@@ -1271,6 +1272,7 @@ public class CommitLog {
                 CommitLog.log.warn("GroupCommitService Exception, ", e);
             }
 
+            // 交换 requestsWrite 和 requestsRead 中的内容
             synchronized (this) {
                 this.swapRequests();
             }
