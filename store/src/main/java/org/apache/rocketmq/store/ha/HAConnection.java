@@ -100,6 +100,7 @@ public class HAConnection {
             while (!this.isStopped()) {
                 try {
                     this.selector.select(1000);
+                    // 读取 slave 同步的 offset
                     boolean ok = this.processReadEvent();
                     if (!ok) {
                         HAConnection.log.error("processReadEvent error");
@@ -216,12 +217,15 @@ public class HAConnection {
                 try {
                     this.selector.select(1000);
 
+                    // 没有获取到从服务器的偏移量
                     if (-1 == HAConnection.this.slaveRequestOffset) {
                         Thread.sleep(10);
                         continue;
                     }
 
+                    // 刚开始执行数据传输
                     if (-1 == this.nextTransferFromWhere) {
+                        // slave第一次上报偏移量
                         if (0 == HAConnection.this.slaveRequestOffset) {
                             long masterOffset = HAConnection.this.haService.getDefaultMessageStore().getCommitLog().getMaxOffset();
                             masterOffset =
@@ -267,6 +271,7 @@ public class HAConnection {
                             continue;
                     }
 
+                    // 获取同步消息数据
                     SelectMappedBufferResult selectResult =
                         HAConnection.this.haService.getDefaultMessageStore().getCommitLogData(this.nextTransferFromWhere);
                     if (selectResult != null) {
@@ -288,6 +293,7 @@ public class HAConnection {
                         this.byteBufferHeader.putInt(size);
                         this.byteBufferHeader.flip();
 
+                        // 传输消息到从服务器
                         this.lastWriteOver = this.transferData();
                     } else {
 

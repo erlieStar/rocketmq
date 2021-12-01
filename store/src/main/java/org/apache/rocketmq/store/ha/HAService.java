@@ -216,6 +216,7 @@ public class HAService {
                                         + sc.socket().getRemoteSocketAddress());
 
                                     try {
+                                        // 将每个连接封装成 HAConnection
                                         HAConnection conn = new HAConnection(HAService.this, sc);
                                         conn.start();
                                         HAService.this.addConnection(conn);
@@ -286,7 +287,9 @@ public class HAService {
         private void doWaitTransfer() {
             if (!this.requestsRead.isEmpty()) {
                 for (CommitLog.GroupCommitRequest req : this.requestsRead) {
+                    // 是否已经同步完成
                     boolean transferOK = HAService.this.push2SlaveMaxOffset.get() >= req.getNextOffset();
+                    // 超时时间为5s
                     long waitUntilWhen = HAService.this.defaultMessageStore.getSystemClock().now()
                             + HAService.this.defaultMessageStore.getMessageStoreConfig().getSyncFlushTimeout();
                     while (!transferOK && HAService.this.defaultMessageStore.getSystemClock().now() < waitUntilWhen) {
@@ -298,6 +301,7 @@ public class HAService {
                         log.warn("transfer messsage to slave timeout, " + req.getNextOffset());
                     }
 
+                    // 唤醒阻塞的线程
                     req.wakeupCustomer(transferOK ? PutMessageStatus.PUT_OK : PutMessageStatus.FLUSH_SLAVE_TIMEOUT);
                 }
 
@@ -557,7 +561,7 @@ public class HAService {
                     if (this.connectMaster()) {
 
                         if (this.isTimeToReportOffset()) {
-                            // 上报偏移量到主服务器
+                            // 发送心跳，上报同步偏移量到主服务器
                             boolean result = this.reportSlaveMaxOffset(this.currentReportedOffset);
                             if (!result) {
                                 this.closeMaster();
@@ -566,6 +570,7 @@ public class HAService {
 
                         this.selector.select(1000);
 
+                        // 同步 commitlog
                         boolean ok = this.processReadEvent();
                         if (!ok) {
                             this.closeMaster();
