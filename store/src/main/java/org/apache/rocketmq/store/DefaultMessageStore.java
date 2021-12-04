@@ -676,10 +676,11 @@ public class DefaultMessageStore implements MessageStore {
 
                         nextBeginOffset = offset + (i / ConsumeQueue.CQ_STORE_UNIT_SIZE);
 
-                        // 当前最大物理偏移量 - 本次消息拉取最大物理偏移量
+                        // 当前master最大物理偏移量 - 本次消息拉取最大物理偏移量
                         long diff = maxOffsetPy - maxPhyOffsetPulling;
                         long memory = (long) (StoreUtil.TOTAL_PHYSICAL_MEMORY_SIZE
                             * (this.messageStoreConfig.getAccessMessageInMemoryMaxRatio() / 100.0));
+                        // 偏移量的差大于物理内存的40%，则从slave拉取
                         getResult.setSuggestPullingFromSlave(diff > memory);
                     } finally {
 
